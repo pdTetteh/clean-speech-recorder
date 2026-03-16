@@ -404,21 +404,6 @@
   <!-- SETUP SCREEN -->
   <div id="screen-setup" class="screen active">
     <div class="card">
-      <div class="card-label">Setup — Google Drive</div>
-      <div class="field">
-        <label>Google OAuth Client ID</label>
-        <input type="text" id="clientId" placeholder="xxxx.apps.googleusercontent.com"/>
-      </div>
-      <div class="field">
-        <label>Google Drive Folder ID <span style="color:var(--text3)">(paste from Drive URL)</span></label>
-        <input type="text" id="folderId" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms"/>
-      </div>
-      <div class="setup-note">
-        <strong>How to get these:</strong> Go to <em>console.cloud.google.com</em> → Create project → Enable Google Drive API → Create OAuth 2.0 Client ID (Web application). Add this page's URL as an Authorised JavaScript origin. The Folder ID is the last part of your Drive folder URL.
-      </div>
-    </div>
-
-    <div class="card">
       <div class="card-label">Participant Info</div>
       <div class="field">
         <label>Participant ID</label>
@@ -543,8 +528,8 @@ let state = {
   audioPlayer: null,
   isRecording: false,
   accessToken: null,
-  folderId: '',
-  clientId: '',
+  folderId: '1WfwM9sc6mfXHeSKs3rXmRYiAMPYG_g97',
+  clientId: '584738927714-av23beulsdtqftl7oo2g6c7mabnqpeho.apps.googleusercontent.com',
   animFrame: null,
   analyser: null,
   sampleRate: 44100,
@@ -2171,11 +2156,11 @@ function onLangChange() {
 async function startSession() {
   const pid = document.getElementById('participantId').value.trim().toUpperCase();
   const lang = document.getElementById('language').value;
-  const cid = document.getElementById('clientId').value.trim();
-  const fid = document.getElementById('folderId').value.trim();
+  const cid = '584738927714-av23beulsdtqftl7oo2g6c7mabnqpeho.apps.googleusercontent.com';
+  const fid = '1WfwM9sc6mfXHeSKs3rXmRYiAMPYG_g97';
 
-  if (!pid || !lang || !cid || !fid) {
-    alert('Please fill in all fields.');
+  if (!pid || !lang) {
+    alert('Please enter your Participant ID and select a language.');
     return;
   }
 
