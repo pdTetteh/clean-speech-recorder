@@ -1,0 +1,2525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ghanaian Clean Speech — Recorder</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #F7F5F0;
+    --surface: #FFFFFF;
+    --surface2: #F0EDE6;
+    --accent: #1A6B4A;
+    --accent-light: #E1F5EE;
+    --accent-mid: #0F6E56;
+    --text: #1C1C1A;
+    --text2: #5F5E5A;
+    --text3: #888780;
+    --border: rgba(0,0,0,0.10);
+    --border2: rgba(0,0,0,0.16);
+    --red: #D85A30;
+    --red-light: #FAECE7;
+    --amber: #BA7517;
+    --amber-light: #FAEEDA;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 16px 60px;
+  }
+
+  header {
+    width: 100%;
+    max-width: 640px;
+    padding: 28px 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .logo svg { width: 20px; height: 20px; }
+
+  .brand { line-height: 1.2; }
+  .brand h1 { font-size: 15px; font-weight: 600; letter-spacing: -0.2px; }
+  .brand p { font-size: 12px; color: var(--text3); }
+
+  .main { width: 100%; max-width: 640px; }
+
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  .card-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 14px;
+  }
+
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { font-size: 13px; color: var(--text2); display: block; margin-bottom: 6px; }
+
+  input, select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 15px;
+    background: var(--surface);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,107,74,0.12); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 22px;
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: var(--accent-mid); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text2);
+    border: 0.5px solid var(--border2);
+  }
+  .btn-ghost:hover { background: var(--surface2); }
+  .btn-ghost:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-danger { background: var(--red-light); color: var(--red); }
+  .btn-danger:hover { background: #f5c4b3; }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .progress-wrap {
+    background: var(--surface2);
+    border-radius: 99px;
+    height: 6px;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+
+  .progress-label {
+    font-size: 12px;
+    color: var(--text3);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .phase-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .phase-tab {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    border: 0.5px solid var(--border2);
+    background: var(--surface2);
+    color: var(--text3);
+  }
+
+  .phase-tab.active {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .phase-tab.done {
+    background: var(--surface2);
+    color: var(--text3);
+    position: relative;
+  }
+
+  .prompt-box {
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    margin: 16px 0;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .prompt-text {
+    font-size: 20px;
+    font-weight: 500;
+    text-align: center;
+    line-height: 1.5;
+    letter-spacing: -0.3px;
+  }
+
+  .prompt-keyword {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--accent);
+  }
+
+  .prompt-hint {
+    font-size: 12px;
+    color: var(--text3);
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  .record-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 0 8px;
+  }
+
+  .record-btn {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    position: relative;
+  }
+
+  .record-btn:hover { transform: scale(1.05); }
+  .record-btn.recording { background: var(--red); animation: pulse 1.2s ease-in-out infinite; }
+  .record-btn.has-audio { background: var(--accent-mid); }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(216,90,48,0.3); }
+    50% { box-shadow: 0 0 0 14px rgba(216,90,48,0); }
+  }
+
+  .record-btn svg { width: 30px; height: 30px; }
+
+  .rec-status {
+    font-size: 13px;
+    color: var(--text3);
+    min-height: 18px;
+    text-align: center;
+  }
+
+  .rec-status.recording { color: var(--red); font-weight: 500; }
+  .rec-status.done { color: var(--accent); font-weight: 500; }
+
+  .waveform-wrap {
+    width: 100%;
+    height: 48px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  canvas#waveCanvas { width: 100%; height: 48px; display: block; }
+
+  .action-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .action-row .btn { flex: 1; }
+
+  .file-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    background: var(--surface2);
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: var(--text2);
+    text-align: center;
+    letter-spacing: 0.2px;
+    margin-bottom: 12px;
+  }
+
+  .upload-status {
+    font-size: 13px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    margin-top: 10px;
+    display: none;
+  }
+
+  .upload-status.uploading { background: var(--amber-light); color: var(--amber); display: block; }
+  .upload-status.success { background: var(--accent-light); color: var(--accent); display: block; }
+  .upload-status.error { background: var(--red-light); color: var(--red); display: block; }
+
+  .nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .item-counter {
+    font-size: 13px;
+    color: var(--text3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .setup-note {
+    font-size: 13px;
+    color: var(--text2);
+    background: var(--amber-light);
+    border-left: 3px solid var(--amber);
+    padding: 12px 16px;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    line-height: 1.6;
+    margin-top: 12px;
+  }
+
+  .setup-note strong { color: var(--amber); }
+
+  .done-screen { text-align: center; padding: 32px 0; }
+  .done-screen h2 { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
+  .done-screen p { color: var(--text2); font-size: 15px; line-height: 1.6; }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 20px 0;
+  }
+
+  .stat-card {
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    text-align: center;
+  }
+
+  .stat-card .val { font-size: 22px; font-weight: 600; color: var(--accent); }
+  .stat-card .lbl { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+  .google-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 18px;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border2);
+    background: white;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 12px;
+    transition: background 0.15s;
+  }
+  .google-btn:hover { background: var(--surface2); }
+
+  .divider { height: 0.5px; background: var(--border); margin: 20px 0; }
+
+  @media (max-width: 480px) {
+    .card { padding: 18px; }
+    .prompt-text { font-size: 17px; }
+    .prompt-keyword { font-size: 24px; }
+    .record-btn { width: 70px; height: 70px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="10" cy="10" r="4" fill="white"/>
+      <path d="M10 2v3M10 15v3M2 10h3M15 10h3" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="brand">
+    <h1>Ghanaian Clean Speech</h1>
+    <p>Recording Portal</p>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- SETUP SCREEN -->
+  <div id="screen-setup" class="screen active">
+    <div class="card">
+      <div class="card-label">Setup — Google Drive</div>
+      <div class="field">
+        <label>Google OAuth Client ID</label>
+        <input type="text" id="clientId" placeholder="xxxx.apps.googleusercontent.com"/>
+      </div>
+      <div class="field">
+        <label>Google Drive Folder ID <span style="color:var(--text3)">(paste from Drive URL)</span></label>
+        <input type="text" id="folderId" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms"/>
+      </div>
+      <div class="setup-note">
+        <strong>How to get these:</strong> Go to <em>console.cloud.google.com</em> → Create project → Enable Google Drive API → Create OAuth 2.0 Client ID (Web application). Add this page's URL as an Authorised JavaScript origin. The Folder ID is the last part of your Drive folder URL.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Participant Info</div>
+      <div class="field">
+        <label>Participant ID</label>
+        <input type="text" id="participantId" placeholder="e.g. P012" maxlength="6"/>
+      </div>
+      <div class="field">
+        <label>Language</label>
+        <select id="language" onchange="onLangChange()">
+          <option value="">— select —</option>
+          <option value="EN">English (EN)</option>
+          <option value="TWI">Twi (TWI)</option>
+          <option value="GA">Ga (GA)</option>
+          <option value="EWE">Ewe (EWE)</option>
+          <option value="HAU">Hausa (HAU)</option>
+          <option value="DAG">Dagaare (DAG)</option>
+        </select>
+      </div>
+      <div id="scriptStatus" style="font-size:13px;padding:10px 14px;border-radius:8px;background:var(--accent-light);color:var(--accent);display:none;margin-top:4px"></div>
+      <div style="margin-top:18px">
+        <button class="btn btn-primary" onclick="startSession()" style="width:100%">Begin Recording Session</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECORDING SCREEN -->
+  <div id="screen-record" class="screen">
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div>
+          <div style="font-size:13px;color:var(--text3)" id="sessionLabel">P012 · TWI</div>
+          <div style="font-size:15px;font-weight:500;margin-top:2px" id="phaseTitle">Sentences</div>
+        </div>
+        <div class="item-counter" id="counterLabel">1 / 150</div>
+      </div>
+
+      <div class="phase-tabs">
+        <div class="phase-tab active" id="tab-sentences">Sentences</div>
+        <div class="phase-tab" id="tab-keywords">Keywords</div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <div class="progress-label">
+        <span id="progressLabel">0 / 300 total</span>
+        <span id="progressPct">0%</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="file-badge" id="fileBadge">P012_TWI_S001_T1.wav</div>
+
+      <div class="prompt-box">
+        <div>
+          <div class="prompt-text" id="promptText">Loading...</div>
+          <div class="prompt-hint" id="promptHint"></div>
+        </div>
+      </div>
+
+      <div class="record-zone">
+        <div class="waveform-wrap">
+          <canvas id="waveCanvas"></canvas>
+        </div>
+
+        <button class="record-btn" id="recordBtn" onclick="toggleRecord()">
+          <svg id="recIcon" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="6" fill="white"/>
+          </svg>
+        </button>
+
+        <div class="rec-status" id="recStatus">Tap to start recording</div>
+      </div>
+
+      <div id="uploadStatus" class="upload-status"></div>
+
+      <div class="action-row">
+        <button class="btn btn-danger" id="retakeBtn" onclick="retake()" disabled>Retake</button>
+        <button class="btn btn-ghost" id="playBtn" onclick="playback()" disabled>Play back</button>
+      </div>
+
+      <div class="nav-row">
+        <button class="btn btn-ghost" onclick="prevItem()" id="prevBtn">← Previous</button>
+        <button class="btn btn-primary" id="nextBtn" onclick="nextItem()" disabled>Save & Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DONE SCREEN -->
+  <div id="screen-done" class="screen">
+    <div class="card done-screen">
+      <div style="width:52px;height:52px;background:var(--accent-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#1A6B4A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h2>All recordings done!</h2>
+      <p>All files have been uploaded to Google Drive.<br/>You can close this tab.</p>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="val">150</div><div class="lbl">Sentences</div></div>
+        <div class="stat-card"><div class="val">150</div><div class="lbl">Keywords</div></div>
+        <div class="stat-card"><div class="val" id="doneParticipant">P012</div><div class="lbl">Participant</div></div>
+        <div class="stat-card"><div class="val" id="doneLang">TWI</div><div class="lbl">Language</div></div>
+      </div>
+      <button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="resetSession()">Start new session</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
+<script>
+let state = {
+  participantId: '',
+  language: '',
+  sentences: [],
+  keywords: [],
+  phase: 'sentences',
+  index: 0,
+  take: 1,
+  mediaRecorder: null,
+  audioChunks: [],
+  audioBlob: null,
+  audioUrl: null,
+  audioPlayer: null,
+  isRecording: false,
+  accessToken: null,
+  folderId: '',
+  clientId: '',
+  animFrame: null,
+  analyser: null,
+  sampleRate: 44100,
+};
+
+const SCRIPTS = {
+  EN: {
+    sentences: [
+      "Please help me.","I need a doctor.","Call the nurse now.","It's an emergency.","I am in pain.",
+      "Someone is bleeding.","Call the ambulance.","Take me to the hospital.","I feel weak.","I can't breathe well.",
+      "Can you call the ambulance?","My blood sugar is too high.","Please check if my blood pressure is normal.","I can't stand.","I have chest pain.",
+      "I have a fever.","My head hurts.","I am coughing.","I have a sore throat.","My chest is tight.",
+      "I feel dizzy.","I have stomach pain.","I am vomiting.","I feel cold.","I have diarrhea.",
+      "I have a headache and a fever.","My medication is causing stomach upset.","I feel dizzy when I stand.","I need pain relief.","My medicine is finished.",
+      "I think I have malaria.","I have high blood pressure.","I have diabetes.","I'm asthmatic.","I have a wound.",
+      "My ulcer is back.","I feel my blood is low.","I think it's typhoid.","I have body pains.","My baby has a rash.",
+      "I am allergic to penicillin.","I want to see the pediatrician.","The child has measles.","My baby is not eating.","The baby has a fever.",
+      "Sit down here.","Lie on the bed.","Open your mouth.","Take this medicine.","Don't eat yet.",
+      "Drink more water.","Come back tomorrow.","Wash your hands.","Wear your mask.","Remove your shoes.",
+      "Take the tablet after eating.","Don't miss your dose.","Help me read the medicine label.","Do I need to take the drug before eating?","Take your drugs on time.",
+      "The doctor is coming.","The nurse will help you.","Wait for your turn.","Have you seen the doctor?","The doctor is busy.",
+      "The nurse will dress the wound.","The doctor said you'll be fine.","The nurse will give you an injection.","The doctor has prescribed a tablet.","The nurse will take your temperature.",
+      "The nurse said I must not miss any dose.","Can I speak to the doctor?","Is the doctor available now?","The nurse asked me to come today.","Please explain my diagnosis again.",
+      "Go to the pharmacy.","Collect your drugs.","Take this once daily.","Don't miss your dose.","You'll take this for five days.",
+      "Come back if it gets worse.","Is the pharmacy open?","How much is the medicine?","This one is for pain.","I need a new prescription.",
+      "My medicine is finished.","Please direct me to the pharmacy.","I need help with my medicine.","Where is the scan room?","I lost my hospital folder.",
+      "My child is not well.","The baby has a fever.","I want to see the pediatrician.","My baby is not eating.","She is pregnant.",
+      "I am in labour.","I need antenatal care.","The child has measles.","I want family planning.","My baby is crying too much.",
+      "Where is the maternity ward?","Can I get a scan today?","I need a referral to a specialist.","When is my next appointment?","The nurse will call your name.",
+      "I want a checkup.","I came for blood test.","I need to check my sugar level.","The result is not ready.","Go for blood pressure check.",
+      "The lab is on the right.","We'll check your weight.","The doctor needs your report.","I have my lab results.","Where is the scan room?",
+      "Where do I go for a lab test?","I need pain relief.","The doctor has signed your form.","The wound is healing.","You'll be fine soon.",
+      "Go to room five.","The consulting room is full.","Your folder is missing.","The queue is long.","Where is the OPD?",
+      "Check your folder number.","Go to the records office.","Register at the front desk.","Sit in the waiting area.","The nurse will call your name.",
+      "This is my health insurance card.","Where is the children's ward?","How long do I wait for the doctor?","I have my lab results.","The doctor has prescribed a tablet.",
+      "You can go home now.","Come back next week.","You need more rest.","Take your drugs on time.","The wound is healing.",
+      "You'll be fine soon.","Don't forget your review.","Let someone assist you.","You've been discharged.","The doctor has signed your form.",
+      "Help me read the medicine label.","Wait for your turn.","I need help with my medicine.","Please take me to the clinic.","I feel weak."
+    ],
+    keywords: [
+      "Help","Doctor","Nurse","Emergency","Pain",
+      "Bleeding","Ambulance","Hospital","Weak","Breathe",
+      "medical attention","blood sugar","blood pressure","Urgent","chest pain",
+      "Fever","Headache","Cough","sore throat","chest tightness",
+      "dizziness","stomach pain","vomiting","cold","diarrhea",
+      "symptoms","medication","nausea","pain relief","upset",
+      "malaria","blood pressure","diabetes","asthma","wound",
+      "ulcer","low blood","allergy","body pain","rash",
+      "allergy","pediatrician","measles","no appetite","fever",
+      "sit","lie","take","medicine","eat",
+      "water","return","wash","mask","shoes",
+      "tablet","dose","read","drug","time",
+      "doctor","nurse","wait","seen","busy",
+      "wound","diagnosis","injection","tablet","temperature",
+      "prescription","speak","available","appointment","explain",
+      "pharmacy","collect","frequency","warning","period",
+      "bad condition","open","cost","pain","renewal",
+      "refill","find","assistance","scan","folder",
+      "child","baby","pediatrician","eating","pregnant",
+      "labour","antenatal","measles","planning","crying",
+      "maternity","scan","appointment","referral","ward",
+      "checkup","blood test","sugar level","results","pressure",
+      "right","weight","report","lab","scan",
+      "test","pain","sign","healing","fine",
+      "room","consulting","missing","queue","direction",
+      "number","records","desk","waiting","name",
+      "insurance","navigation","duration","lab results","doctor",
+      "discharge","come back","rest","on time","wound",
+      "soon","review","assist","go home","form",
+      "label","patience","dependence","clinic","weak"
+    ]
+,
+  EWE: {
+    sentences: [
+      "Meɖe kuku kpe ɖe ŋutinye.",
+      "Mehiã Ɖɔkita",
+      "Yɔ nɔsia fifia/enumake",
+      "Nudzɔdzɔ kpatae",
+      "Mele veve sem",
+      "Eʋu Le kɔkɔm le ame aɖe ŋu",
+      "Yɔ dɔnɔʋua/ambulansia",
+      "Kɔkɔm yi dɔnɔkɔdzi/Kɔdzi",
+      "Me gbɔdzɔ",
+      "Gbɔgbɔ me le nye sum o",
+      "Ɖe ateŋu ayɔ ambulansia?",
+      "Sukli sɔ gbɔ le nyee ʋu me akpã",
+      "Meɖe kuku kpɔ ɖa be nye gbɔgbɔ le ɖoɖo nu mahã",
+      "Gbɔgbɔ mele nye sum o",
+      "Akɔta le ve yem",
+      "Asrã lém",
+      "Eta le ɖunyem",
+      "Mele kpe kpem",
+      "Vetome le nye vem",
+      "Nye akɔta xɛ́",
+      "Ŋkume le nye mum",
+      "Dɔme le ɖunyem",
+      "Mele nu ɖem/ mele tutrum",
+      "Vuvɔ le wɔnyem",
+      "Dɔnyeme le tɔtrɔm",
+      "Etavɛ kple asrã le fu ɖem nam",
+      "Nye atikewo le ewɔm be nye dɔme le tɔtrɔm",
+      "Ŋkume le nye trɔm, ne metso ɖe tsitre",
+      "Mehiã na atike",
+      "Nye atikewo vɔ",
+      "Ewɔ nam be asrã lém",
+      "Nye ʋu yi dzi",
+      "Sukli dɔ le ŋunye",
+      "Gbɔxi dɔ le ŋunye",
+      "Abi le ŋunye",
+      "Nye lãmebi dɔa trɔ gbɔ",
+      "Nye ʋu ɖiɖi",
+      "Mekaɖe edzi be asrãdziẽ",
+      "Lãme le venyem",
+      "Vinyea ƒe ŋuti le efiem",
+      "Pɛnisili menyo nam o",
+      "Medi be makpɔ ɖeviwo ƒe Ɖɔkita",
+      "Gbaɣi lé ɖevia",
+      "Vinyea mele nu ɖum o",
+      "Asrã lé ɖevia",
+      "Nɔ anyi ɖe afi sia",
+      "Mlɔ aba dzi",
+      "Ke nu",
+      "Xɔ atike sia",
+      "Mega ɖu nu haɖe o",
+      "No tsia woasɔ gbɔ",
+      "Trɔ va etsɔ",
+      "Klɔ asi",
+      "Ɖɔ wò ŋkumetsɔnua",
+      "Ɖe wò afɔkpawo",
+      "No wò atikewo le nu ɖuɖu vɔ megbe",
+      "Mega ŋlɔ wò atike nonoa be o",
+      "Kpeɖe ŋutinye ne maxlẽ nuŋɔŋlɔ si le atikegoa dzi",
+      "Mano atikea hafi maɖu nua?",
+      "No wò atikewo le game dzi",
+      "Ɖɔkita la gbɔna",
+      "Nɔsia akpe ɖe ŋuwò",
+      "Lala ne wòaɖo dziwò",
+      "Ekpɔ Ɖɔkita la?",
+      "Ɖɔkita la xaxa",
+      "Nɔsia akpɔ abia gbɔ",
+      "ɖɔkita be àhaya",
+      "Nɔsia ado abiu na wò",
+      "Ɖɔkita ŋlɔ atikekui aɖe na wò",
+      "Nɔsia adzidze wò lamẽ ƒe dzoxɔxɔ",
+      "Nɔsia be nyame gagblẽ atike aɖeke ɖi emanomano o",
+      "Mateŋu aƒo nu kple Ɖɔkitaa?",
+      "Ɣeyiɣi vi aɖe le Ɖɔkita nua?",
+      "Nɔsia be mava egbe",
+      "Meɖe kuku gakɔ nusi gblẽ le ŋutinye la me nam ake",
+      "Yi ɖe atikexɔƒea",
+      "Yɔ wò atikeawo",
+      "No esia, gbe ɖeka zi ɖeka",
+      "Kpɔ egbɔ be yeno atikea ɖe ɖoɖonu",
+      "Ele esia no ge ŋkeke atɔ̃",
+      "Trɔ nava, ne dɔ la nyra ɖe dzi",
+      "Atikenaƒea le ʋuʋua?",
+      "Nenie nye atikea?",
+      "Esia tsia vevesese nu",
+      "Mehiã na atike bubu",
+      "Nye atikea vɔ",
+      "Meɖe kuku fiam atikexɔƒea",
+      "Mehiã kpekpeɖeŋu le nye atikenonyawo ŋuti",
+      "Exɔ kamee wowɔa sikania le?",
+      "Nye kɔdzigbãlea bu",
+      "Vinyea ƒe lãme mele kɔkɔm o",
+      "Asrã lé ɖevia",
+      "Medi be makpɔ ɖeviwo ƒe Ɖɔkita",
+      "Vinyea mele nu ɖum o",
+      "Efɔ fu",
+      "Mele ku lém",
+      "Mehiã na efudzikpɔkpɔ ƒe be lélé",
+      "Agbaɣi lé ɖevia",
+      "Mehiã na ɖoɖo wɔwɔ ɖe evi dzidzi ŋuti",
+      "Vinyea le avi fam, atraɖii",
+      "Afi kae nye efudaƒea?",
+      "Mateŋu atso sikania egbea?",
+      "Mehiã na agbãle hena ne aɖaŋuɖolatɔxɛ kpɔkpɔ?",
+      "Ɣekaɣie wòdze be maga trɔ ava?",
+      "Nɔsia, ayɔ ŋkɔwò",
+      "Medi be mado ɖokuinye akpɔ",
+      "Meva eʋu do ge akpɔ",
+      "Edze be mado nye sukli akpɔ",
+      "Emetsonua mesɔ gbe haɖe o.",
+      "Yi ne wòado wò ʋu akpɔ",
+      "Eʋuɖeƒea le wò nuɖusi me",
+      "Miado wò kpekpeme akpɔ",
+      "Ɖɔkita hiã na wò (dodokpɔ) metsonuawo",
+      "Nye labu metsonuawo ka asinye",
+      "Afi kae nye sikaniwɔƒea?",
+      "Afi kae mayi aɖe ʋu?",
+      "Mehiã na vevesese dziɖekpɔtɔ",
+      "Ɖɔkita de asi wò agbalẽa te",
+      "Abia le kukum",
+      "Ele keke ge ɖe eme na wò kpuie",
+      "Yi xɔ atɔ̃lia me.",
+      "Gbexɔleamenuƒea yɔ",
+      "Wò kɔdzigbãlea bu",
+      "Eflia didi",
+      "Afikae nye dɔnɔwoxɔɖoƒe?",
+      "Lé ŋku ɖe wò kɔdzigbãlea ƒe dzesi de ŋuti",
+      "Yi ŋutsotsoxɔƒea",
+      "Ɖe ɖokuiwò nu le ŋutsotsoxɔƒea",
+      "Nɔ anyi ɖe amedzɔƒea",
+      "Nɔsia ayɔ ŋkɔwò",
+      "Nye lãmesegbãlevi lae nye esi",
+      "Afi kae ɖeviwoxɔɖoƒe la le?",
+      "Ɣeyiɣi nenie mele Ɖɔkita lala ge?",
+      "Nye labu metsonuawo su asinye",
+      "Ɖɔkita ŋlɔ atikekui nam",
+      "Ateŋu ayi aƒeme azɔ",
+      "Trɔ va le Kɔsiɖa si gbɔna me.",
+      "Ehiã ɖiɖiɖeme",
+      "No atikewò ɖe ɣeyiɣi dzi.",
+      "Abi la le kukum",
+      "Ele kaka ge ɖe eme na wò kpuie",
+      "Mègaŋlɔ ŋkeke si nàtrɔ va kpɔ ɖɔkita be o",
+      "Na ame aɖe nakpe ɖe ŋuwò",
+      "Woɖe asi le ŋuwò",
+      "Ɖɔkita de asi wò agbalẽa te",
+      "Kpe ɖe ŋutinye ne maxlẽ nuŋɔŋlɔ si le atikea dzi",
+      "Lala ne wòaɖo dziwò",
+      "Mehiã na kpekpeɖeŋu na nye atike nyawo",
+      "Meɖe kuku kplɔm yi dɔnɔkɔdzi",
+      "Megbɔdzɔ."
+    ],
+    keywords: [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "folder
+G. Child Health & Maternity 
+My child is not well. (child",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ]
+  },
+  DAG: {
+    sentences: [
+      "sɔrɔŋ soŋ ma",
+      "N boɔrɛɛ a dɔɔta",
+      "boɔle a nɛɛse pampana",
+      "Yel-uraa la",
+      "N eŋɛ beɛrɛŋ",
+      "neɛ kaŋa zẽẽ yireŋ zẽẽ kyiri",
+      "boɔle a baalba lɔɔre",
+      "de ma gaa ne asibiti",
+      "Baloo kpɛ ma la",
+      "n ba toɔno voorɔ soŋ",
+      "Fo na toɔ boɔle la a baalba lɔɔre?",
+      "n z fannoo doe saa gaali",
+      "sɔroo la kaa nyɛ n zẽẽ kpa-duobu are la o gbɛ-bogiri be",
+      "N kombaŋ iri are",
+      "N taaɛ nyaa-ɔɔ",
+      "N taa la fiiva",
+      "n zu beɛrɛŋ",
+      "N kɔrɔŋ",
+      "N taa la kɔkɔr-fele",
+      "n nyaa feerɛŋ",
+      "N niŋe viireŋ",
+      "N poɔ beɛrɛŋ",
+      "N tiireŋ",
+      "maaroŋ kpɛ ma la",
+      "N zoro la baŋkõɔ",
+      "N taa la zu-bɛ baaloŋ ane fiiva",
+      "A n tẽẽ nyuuri korɔ ma la po-dɔ̃ɔ̃ yaga",
+      "N niŋe maŋ viireŋ ka maaŋ wa are",
+      "N boɔrɛɛ tẽẽ naŋ na vɛŋ ka n engan-ɔɔ noɔre sigiri",
+      "N tẽẽ baarɛɛ",
+      "N nyɛ la ka a e ŋa donne baaloŋ kpɛ ma la",
+      "N taa la zẽẽ kpa-duobu baaloŋ",
+      "N taa la sikiri baalaong",
+      "N taa la yooro-ŋmaa baaloŋ",
+      "N taa fele",
+      "N poɔ baaloŋ leɛ wa la",
+      "N nyɛ la ka a e ŋa n zẽẽ sigee la",
+      "A e ŋa bondi",
+      "N eŋama ɔɔrɔŋ",
+      "N bie taa la wɔmbiri",
+      "N eŋɛ ba maŋ boɔrɔ tẽẽkõɔ 'penicillin'",
+      "N boɔrɔ ka n nyɛ a bigbaane dɔɔta",
+      "a bie taa la wɔmɔ baaloŋ",
+      "N bie ba dire diibu",
+      "A bie taa la fiiva",
+      "zeŋ kyɛ",
+      "gaŋ a gado zu",
+      "Haa a fo noɔre",
+      "de a tẽẽna nyu",
+      "ta di sɛre",
+      "Nyuuro kõɔ yaga",
+      "Leɛ wa bieu",
+      "pɛge fo nuuri",
+      "eŋ a fo nyɔbog-tooraa",
+      "fuo a fo nɔɔteɛ",
+      "vɔle a tẽẽbie ka fooŋ wa di baare",
+      "ta galla a fo tẽẽ nyuubu vuo",
+      "wuli a sɛgere naŋ sɛge mare a tẽẽ eŋɛ",
+      "A seŋ ka N daŋ nyu a tẽẽ kyɛ baŋ dire be?",
+      "nyu a fo tẽẽa wagre a naŋ seng ne",
+      "A dɔɔta waana la",
+      "A nɛɛse na soŋ fo la",
+      "kyɛle ka a ka fo wagre ta",
+      "Fo nye la a dɔɔta",
+      "A dɔɔta nimiri moɔ la",
+      "a nɛɛse na pɛge la a fele",
+      "A dɔɔta yeli ka fo nan ynɛ la laafeɛ",
+      "A nɛɛse na kyɔge fo la pimbiri",
+      "A dɔɔta sɛge wuli la tẽẽbie",
+      "A nɛɛse na kaa nyɛ la a fo eŋɛ tolong bee maaroŋ naŋ seŋ lɛ",
+      "A nɛɛse yelka N ta wa galla a tẽẽ kaŋa zaa nyuubu",
+      "n na baŋ yeli la yɛlɛ a dɔɔta zie?",
+      "a dɔɔta peɛlɛɛ la pampana?",
+      "a nɛɛse yeli ka N leɛ wa zine",
+      "sɔroo la maaleŋ leɛ mannewuli ma a baaombiri na fo naŋ feele nyɛ",
+      "Gaa a tẽẽ-de dieŋ",
+      "De a fo tẽẽ",
+      "maŋ de ŋa dayeni bebiri zaa",
+      "ta wa galla a fo tẽẽ nyuubu",
+      "Fo na de la a ŋa te ta bibie anuu",
+      "Leɛ wa ka anaŋ wa maaleŋ waa nimizeɛ",
+      "A tẽẽ-de zie you la?",
+      "A tẽẽ daaroŋ waa la Adoma",
+      "A ŋa eɛ zi-ɔɔre tẽẽ",
+      "leɛ sɛge tẽẽ yobo ko ma",
+      "N tẽẽ baarɛɛ la",
+      "sɔroo la mannewuli ma a tẽẽ deebo zie",
+      "N boorɛɛ sommo kyaare ne a n tẽẽnɛɛ ama nyuubu",
+      "Yeŋ ka a baala-foto-ŋmaa zie be",
+      "N bore la a n asibiti ganlee bare",
+      "n bie ba so laafeɛ",
+      "A bileɛ taa la fiiva",
+      "N booro ka n nye a bigbaama dɔɔta",
+      "n bileɛ ba dire",
+      "O taa la poɔ",
+      "N be la n dɔgebo vuo poɔŋ",
+      "N boarɔ ka yɛ kaama sɛre ka n dɔgebo baŋ ta",
+      "A bie taa la wɔmɔ baaloŋ",
+      "N boɔrɛɛ dɔgebo ŋmaabaroo tẽẽ",
+      "N bileɛ kono la te zuo",
+      "Yeng ka a pogedooreba yiri be",
+      "yɛ na baŋ ŋmaa ma la baala foto a zine be",
+      "Yɛ koma torɔnfɛɛ gane ka N gaa nyɛ dɔɔta yuo",
+      "Bebiri buo la ka yɛ eŋ ko ma ka N leɛ wa?",
+      "A nɛɛse na boɔle la a fo yuori",
+      "N boɔrɔ ka yɛ leɛ pigiri kaa n nyɛ laafeeloŋ nyɛ a ko ma",
+      "N wa la ka yɛ feele n zẽẽnyɛ lɛ",
+      "N boɔrɔ ka yɛ feele n zẽẽ fannoo do-are-taabo zie nyɛ lɛ",
+      "A feeloo yelbɔnyerre ba yi sɛre",
+      "zẽẽ-kpado-semmo",
+      "A feeloo die be la a doloŋ sɛŋ",
+      "Te na kaa nyɛ la a fo tegroŋ",
+      "a dɔɔta boɔrɛɛ fo laafeeloŋ ganlee",
+      "N taa la a n feeloo yelbonyerre nɔ-iri",
+      "Yeŋ la ka a baalba foto-ŋmaa dieŋ be?",
+      "Yeŋ la ka N na gaa ka ba feele ma",
+      "N boɔrɛɛ tẽẽ naŋ na vɛŋ ka n engan-ɔɔ noɔre sigiri",
+      "A dɔɔta golgoli la a gane",
+      "A fele maanaŋ",
+      "A koŋ kɔɔre kyɛ ka fo nyɛ laafeɛ",
+      "Gaa a deri anuu soba",
+      "A baalpeɛre die pae la",
+      "A fo gane bɔrɛɛ la",
+      "A fuoli waa la wogi lɛ",
+      "Yeŋ la ka a baalba zempɛnnoo zie be?",
+      "kaa nyɛ a fo gane namba",
+      "Gaa a yelsɛg-binne ɔfere",
+      "Gaa a niŋe taabol te sɛge fo yuori",
+      "Zeŋ a kyɛloo zie",
+      "A nɛɛse na boɔle la a fo yuori",
+      "A n ensoɔrɛ gane la a ŋa",
+      "Yeŋ ka a bibaalba Die be?",
+      "Boŋ wagere la seŋ ka N kyɛle a dɔɔta te ta ne?",
+      "N taa la n feeloo yelbonyɛrre gane",
+      "A dɔɔta sɛge mannewuli la a tẽẽbie dɔɔta",
+      "Fo na baŋ gaa la yiri",
+      "leɛ wa daa ŋa naŋ waana",
+      "A seŋ ka fo pɛnne yaga",
+      "Maŋ nyu a fo tẽẽ pɔge wagere",
+      "A fele maanaŋ",
+      "Fo na nyɛ la laafeɛ pampana",
+      "ta wa yinne, maŋ leɛre wa ka te peɛre nyɛ a fo laafeeloŋ naŋ kyɛnɛ seŋ lɛ",
+      "Vɛŋ ka neɛ kaŋa soŋ fo",
+      "Ba iri",
+      "A dɔɔta goligoli la a fo gane wuli ka ba bare fo la sori",
+      "Soŋ ma kanne a tẽẽ mannewuluu ko ma",
+      "kyɛle ka a fo wagre ta",
+      "N boɔrɛɛ sommo kyaare ne a n tẽẽnɛɛ ama nyuubu",
+      "sɔroo la de ma gaa ne a asibiti bile na",
+      "Baloo kpɛ ma la"
+    ],
+    keywords: [
+      "soŋ",
+      "dɔɔta",
+      "nɛɛse",
+      "yel-uraa",
+      "wono",
+      "zẽẽ kyiri",
+      "baalba lɔɔre",
+      "asibiti",
+      "baloo",
+      "voore",
+      "Neɛ leɛ kaa sammo",
+      "zẽẽ fannoo",
+      "zẽẽ kpa-duobu",
+      "tantaŋ lɛ",
+      "nyaa-ɔɔ",
+      "fiiva",
+      "zu-bɛ baaloŋ",
+      "kɔroo",
+      "kɔkɔr-fele",
+      "nya-feere",
+      "nimi-viir",
+      "po-ɔɔ baaloŋ",
+      "tiiri",
+      "maaroŋ",
+      "biŋkõɔ",
+      "baaloŋ piiluŋ nyɔgebo wuluu",
+      "tẽẽ-nyuuri",
+      "aŋa tiiri",
+      "engan-ɔɔ noɔre sigiri",
+      "dɔɔmo",
+      "donne baaloŋ",
+      "zẽẽ kpa-duobu baaloŋ",
+      "sikiri baaloŋ",
+      "yooro-ŋmaa baaloŋ",
+      "fele",
+      "pobaalong",
+      "zẽẽsigibu",
+      "dɔɔmo",
+      "engan-ɔɔ",
+      "wɔmbiri",
+      "ba taa faŋa",
+      "bigbaane dɔɔta",
+      "wɔmɔ baaloŋ",
+      "noɔre ba noma",
+      "fiiva",
+      "zeŋ",
+      "gaŋ",
+      "de",
+      "tẽẽ",
+      "di",
+      "kõɔ",
+      "lɛ leɛ wa",
+      "pɛge",
+      "ngɔbog-tooraa",
+      "nɔɔteɛ",
+      "tẽẽbie",
+      "tẽẽ nyuubu",
+      "kane",
+      "tẽẽ",
+      "wagre",
+      "dɔɔta",
+      "nɛɛse",
+      "kyɛle",
+      "nye",
+      "taa toma",
+      "fele",
+      "baalombiri peɛrenyaabo",
+      "pimbiri kyɔgebo",
+      "tẽẽbie",
+      "eŋ-maarong bee en-toloŋ",
+      "tẽẽ-tere mannewuluu",
+      "Yeli",
+      "peɛle",
+      "bebi ennaa",
+      "mannewuli",
+      "tẽẽ-de zieŋ",
+      "de",
+      "wagere zaa",
+      "kpaamo",
+      "sanga",
+      "baaloŋ kaŋa naŋ ba soma",
+      "yuo",
+      "daaroŋ",
+      "zi-ɔɔ",
+      "leɛ maaloo",
+      "leɛ paale ma a mine",
+      "nyeebo",
+      "sommo",
+      "baala foto ŋmaa",
+      "asibiti ganlee",
+      "bie",
+      "bileɛ",
+      "bigbaama dɔɔta",
+      "dire",
+      "poɔ",
+      "dogebo vuoŋ",
+      "yel-e wɛdere mine sɛre ka neɛ baŋ dɔge",
+      "wɔmɔ",
+      "dɔgeŋmaabaroo",
+      "konni",
+      "pogedooreba",
+      "baalba-foto ŋmaa",
+      "bebi-ennaa",
+      "torɔnfɛɛ",
+      "baalba dieŋ",
+      "eŋɛ laafeeloŋ leɛ-pigiri-kaabo",
+      "zẽẽ feelo-kaabo",
+      "zẽẽ fannoo",
+      "feeloo yelbɔnyerre",
+      "kpaduobu",
+      "doloŋ",
+      "tegroŋ",
+      "laafeeloŋ duoro ganlee",
+      "feeloŋ die",
+      "Baalba foto ŋmaa",
+      "feele",
+      "ɔɔbo",
+      "golgoli",
+      "maanaŋ",
+      "laafeɛ",
+      "die",
+      "Baalpeɛre",
+      "bɔrɛɛ",
+      "fuoli",
+      "zi-wulaa",
+      "namba",
+      "yelsɛg-binne",
+      "taabol",
+      "kyɛloo",
+      "yuori",
+      "ensoɔrɛ",
+      "A wuli baalba dɔɔtasobie mine tuuruŋ",
+      "Wagre",
+      "feeloo yelbonyɛrre gane",
+      "dɔɔta",
+      "barebo",
+      "leɛ wa",
+      "pɛnoo",
+      "a pɔge wagere",
+      "fele",
+      "pampana",
+      "laafeeloŋ leɛ peɛroo",
+      "soŋ",
+      "gɛrɛ dieu",
+      "sori",
+      "mannewuluu",
+      "kannyiri",
+      "a dɛle tẽẽ",
+      "asibiti bile",
+      "baloo"
+    ]
+  },
+  TWI: {
+    sentences: [
+      "Mepa wo kyԑw boa me",
+      "Mehia dɔkota",
+      "Frԑ nԑԑse no seesei ara",
+      "Mehia mmoa no ntԑm pa ara so",
+      "Mewɔ yaw mu pa ara",
+      "Mogya retu obi",
+      "Frԑ lɔre a wɔde fa ayarefoɔ",
+      "Fa me kɔ ayaresabea",
+      "Me ho yԑ me mmrԑ",
+      "Mentumi nhome yie",
+      "Wobԑtumi afrԑ lɔre a ԑfa ayarefoɔ no?",
+      "M'asikyire no kɔ soro dodo",
+      "Mepa wo kyԑw, kyekyere me nsa ma mehwԑ sԑ me prԑhya no yԑ a",
+      "Mentumi nhome yie",
+      "Me koko",
+      "Ebunu akye me",
+      "Me ti pae me",
+      "Merebɔ wa",
+      "Me mene mu ayԑ kuro",
+      "Me koko ayԑ tԑnn",
+      "M'ani so biri me",
+      "Me yafunu yԑ me ya",
+      "Merefe",
+      "Awɔ ate agu me so",
+      "Me yam retu",
+      "Me ti pae me, ԑna ebunu nso akye me",
+      "M'aduro a menom no ama m'afu ahyԑ",
+      "Sԑ mesɔre gyina hɔ a na m'ani so biri me",
+      "Mehia aduro a ԑbԑma me ho atɔ me",
+      "M'aduro no asa",
+      "Megye di sԑ atridii akye me",
+      "Mewɔ mogya mmorosoɔ",
+      "Mewɔ asikyire yareԑ",
+      "Mebɔ ntehyeewa",
+      "Ekuro atu me",
+      "Me yam kuro no asane aba",
+      "Menya atenka sԑ me mogya so ate",
+      "Megye di sԑ ԑyԑ atridinini",
+      "Me honam yԑ me ya",
+      "Nsaawa ate agu me ba no ho",
+      "Penicillin topaeԑ no mpԑ me ho",
+      "Mepԑ sԑ mekɔhunu mmɔfra dɔkota",
+      "Ntoburo agu me ba ho",
+      "Me ba no ntumi nnidi",
+      "Ebunu akye me ba no",
+      "Tena ha",
+      "Da mpa no so",
+      "Bue w'anum",
+      "Nom aduro yi",
+      "Nnidi ansa",
+      "Nom nsuo bebree",
+      "Sane bra ɔkyena",
+      "Hohoro wo nsa",
+      "Hyԑ wo nkatano no",
+      "Worɔ wo mpaboa",
+      "Sԑ wodidi wie a nom aduro yi",
+      "Nnyae w'aduronom no ntoto mu",
+      "Boa kenkan krataa a ԑhyԑ m'aduro yi ho ma me",
+      "Ԑsԑ sԑ menom aduro yi ansa na madidi anaa?",
+      "Nom w'aduro no berԑ a yԑahyԑ wo no ara",
+      "Dɔkota no reba",
+      "Nԑԑse no bԑboa wo",
+      "Twԑn, ԑbԑduru wo so",
+      "Woahu dɔkota no anaa?",
+      "Dɔkota no rehwԑ obi",
+      "Nԑԑse no bԑkyekyere wo kuro no",
+      "Dɔkota no se, wo ho bԑtɔ wo",
+      "Nԑԑse no bԑwɔ wo paneԑ",
+      "Dɔkota no bԑtwerԑ aduro",
+      "Nԑԑse no bԑhwԑ sԑ sԑdeԑ wo ho hyeԑ teԑ",
+      "Nԑԑse no se, mma mennyae m'aduronom no bi nto mu",
+      "Mԑtumi ne dɔkota no akasa anaa?",
+      "Dɔkota no wɔ hɔ seesei anaa?",
+      "Nԑԑse no se memmra nnԑ",
+      "Mepa wo kyԑw, wobԑtumi akyerԑkyerԑ deԑ ԑreyԑ me no mu akyerԑ me anaa?",
+      "Kɔ baabi a yԑgye aduro no",
+      "Gye w'aduro",
+      "Nom baako da biara",
+      "Nnya w'aduro no bi nto mu",
+      "Wobԑnom wei nna nnum",
+      "Sԑ ano yԑ den a, sane bra",
+      "Yԑabue adurogyebea hɔ anaa?",
+      "Aduro no boɔ yԑ sԑn?",
+      "Yԑde wei sɔ honamyaw ano",
+      "Mehia aduro",
+      "M'aduro",
+      "Mesrԑ wo, kyerԑ me ɔkwan a mede bԑkɔ adurogyebea hɔ",
+      "Mehia mmoa fa m'aduro no ho",
+      "Ԑhen na ԑdan a wɔtwa nnipadua mfoni no wɔ?",
+      "Nwoma a wɔtwerԑ me nsԑm gu mu no ayera",
+      "Me ba no ho mfa no",
+      "Ebunu akye me ba no",
+      "Mepԑ sԑ mehu dɔkota a ɔhwԑ mmɔfra no",
+      "Me ba no ntumi nnidi",
+      "Ɔnyem",
+      "Awoɔ aka me",
+      "Mehia apemfoɔ ayaresa",
+      "Ntoburo",
+      "Mepԑ awoɔ ntetemu ho nhyehyԑeԑ",
+      "Me ba no resu dodo",
+      "Ԑhen na abaatan a wɔawo foforɔ no da?",
+      "Mԑnya me mfoni no nnԑ anaa?",
+      "Mehia sԑ dɔkota ma me krataa na mede kɔhunu dɔkota a wakwadare wɔ me yareԑ no ho",
+      "Da bԑn na mԑsane aba abԑhunu dɔkoka?",
+      "Nԑԑse no bԑfrԑ wo",
+      "Mepԑ sԑ mehwehwԑ m'apɔ mu hunu sԑ biribi ha me a",
+      "Mebԑyԑԑ me mogya mu nhwehwԑmu",
+      "Mepԑ sԑ mehwԑ asikyire dodoɔ a ԑwɔ me mogya mu",
+      "Wo nhwehwԑmu no mu nsԑm mmaeԑ",
+      "Kɔkyekyere wo nsa hwԑ wo prԑhya",
+      "Baabi a wɔyԑ nhwehwԑmu no wɔ wo nifa so",
+      "Yԑbԑhwԑ wo mu duru",
+      "Dɔkota no hia wo nhwehwԑmu no mu nsԑm no",
+      "Manya me nhwehwԑmu no mu nsԑm no",
+      "Ԑhen na ԑdan a wɔtwa nnipadua mu mfoni no wɔ?",
+      "Ԑhen na menkɔyԑ me nhwehwԑmu no?",
+      "Mehia honamyaw aduro",
+      "Dɔkota no de ne nsa ahyԑ me krataa no ase",
+      "Ekuro",
+      "Ԑnkyԑ, wo ho bԑtɔ wo",
+      "Kɔ ԑdan a yԑatwerԑ anim 5 no",
+      "Dɔkota no ayarehwԑ dan no mu ayԑ ma",
+      "Wo nwoma a wo ho nsԑm wɔ mu no ayera",
+      "Nnipa a wɔdidi soɔ",
+      "Ԑhen na OPD no wɔ?",
+      "Hwԑ nɔma a ԑwɔ nwoma a wo ho nsԑm wɔ mu",
+      "Kɔ baabi a wɔatwerԑtwerԑ obiara ho nsԑm agu no",
+      "Kɔtwerԑ wo din wɔ pono a ԑwɔ anim hɔ no ho",
+      "Tena faako a yԑtwԑn kɔpem sԑ wɔbԑbɔ yԑn din hɔ",
+      "Nԑԑse no bԑfrԑ wo",
+      "M'apɔmuden nsiakyibaa kaade",
+      "Ԑhen na wɔgye mmɔfra to no?",
+      "Mԑtwԑn dɔkota no akɔsi berԑ dodoɔ sԑn?",
+      "Me nhwehwԑmu no mu nsԑm no aba",
+      "Dɔkota no atwerԑ aduro ama me",
+      "Afei wobԑtumi akɔ fie",
+      "Nnawɔtwe a yԑbԑsi mu no, sane bra",
+      "Wohia ahomegyeԑ pa ara",
+      "Nom w'aduro no berԑ a yԑahyԑ ama wo no pԑpԑԑpԑ",
+      "Wo kuro",
+      "Ԑnkyԑ wo ho bԑtɔ wo",
+      "Mma wo werԑ mfiri sԑ wobԑba abԑhunu dɔtoka",
+      "Ma obi mmoa wo",
+      "Yԑayi wo",
+      "Dɔkota no de ne nsa ahyԑ wo krataa no ase",
+      "Boa me na menkenkan krataa a ԑhyԑ aduro no ho no",
+      "Twԑn na ԑnnuru wo so",
+      "Mehia mmoa fa me nnuro no ho",
+      "Mesrԑ wo, fa me kɔ ayaresabea",
+      "Me ho yԑ me mmrԑ"
+    ],
+    keywords: [
+      "Mmoa",
+      "Dɔkota",
+      "Nԑԑse",
+      "ntԑntԑm adehia",
+      "Ɔyaw",
+      "Mogyatuo",
+      "Ambulanse",
+      "Ayaresabea",
+      "Ahoɔmmrԑ",
+      "home a ԑnsisi so",
+      "Ambulance",
+      "asikyire yareԑ",
+      "mogya borosoɔ",
+      "ayarehwԑ ntԑm so",
+      "koko yareԑ",
+      "Ebunu",
+      "Atipaeԑ",
+      "Ԑwa",
+      "Menemukuro",
+      "koko a ayԑ tԑnn",
+      "anisobiri",
+      "yafunu yareԑ",
+      "ԑfeԑ",
+      "awɔ",
+      "ayamtuo",
+      "sa ara na me ho yԑ me",
+      "yafunu yareԑ",
+      "anisobiri",
+      "ahotɔ",
+      "ma aduro",
+      "atridii",
+      "mogya mmorosoɔ",
+      "asikyire yareԑ",
+      "ntehyeewa",
+      "ekuro",
+      "yafunu mo kokoram",
+      "mogyaweԑ",
+      "atridinini",
+      "honamyea",
+      "nsaawa",
+      "nsunsuansoɔ",
+      "mmɔfra dɔkota",
+      "ntoburo",
+      "ɔba",
+      "ebunu",
+      "atenaseԑ",
+      "nna",
+      "aduronom",
+      "aduronom",
+      "adidie",
+      "nsunom",
+      "sane bra",
+      "nsahohoro",
+      "ano",
+      "mpaboa",
+      "aduronom",
+      "nom",
+      "aduro krataa",
+      "aduro",
+      "berԑ",
+      "dɔkota",
+      "nԑԑse",
+      "twԑn",
+      "woahwԑ wo",
+      "ɔnni berԑ",
+      "ekuro",
+      "wahu deԑ ԑreyԑ wo",
+      "paneԑ",
+      "aduro",
+      "wo ho hyeԑ",
+      "aduro",
+      "kasa",
+      "aduru wo so",
+      "ԑsԑ sԑ meba",
+      "kyerԑ mu",
+      "adugyebea",
+      "gye",
+      "mprԑ dodoɔ",
+      "ahwԑyie",
+      "berԑ",
+      "aduro",
+      "abue",
+      "ԑboɔ",
+      "ɔyaw",
+      "aduro sesa",
+      "aduro foforɔ",
+      "hwehwԑ",
+      "mmoa",
+      "mfoni",
+      "nwoma",
+      "abɔfra",
+      "abɔfra",
+      "mmɔfra dɔkota",
+      "adidie",
+      "nyinsԑn",
+      "awoɔ",
+      "apemfoɔ ayarehwԑ",
+      "ntoburo",
+      "nhyehyԑeԑ",
+      "esu",
+      "abaatan nnaeԑ",
+      "mfoni",
+      "merekɔhyia dɔkota",
+      "merekɔhyia dɔkota",
+      "ayarefoɔ nnaeԑ",
+      "nhwehwԑmu",
+      "mogya mu nhwehwԑmu",
+      "mogya mu asikyire",
+      "laabo nhwehwԑmu",
+      "prԑhya",
+      "nifa",
+      "wo mu duru",
+      "nsԑm",
+      "nhwehwԑmu mu nsԑm",
+      "mfoni",
+      "nhwehwԑmu",
+      "ɔyaw",
+      "nsahyԑase",
+      "ԑrewu",
+      "ahotɔ",
+      "ԑdan",
+      "ayarehwԑ",
+      "nwoma",
+      "santene",
+      "akyerԑkyerԑ kwan",
+      "nɔma",
+      "beaeԑ nkrataa gu",
+      "pono",
+      "twԑn",
+      "edin",
+      "nsiakyibaa",
+      "akyerԑkyerԑkwan",
+      "berԑ",
+      "laabo nhwehwԑmu",
+      "dɔkota",
+      "yԑayi wo",
+      "efie",
+      "ahomegyeԑ",
+      "berԑ",
+      "ekuro",
+      "ԑnkyԑ",
+      "bԑhu dɔkota",
+      "mmoa",
+      "kɔ fie",
+      "krataa",
+      "nnuro krataa",
+      "aboterԑ",
+      "mehia mmoa",
+      "ayaresabea",
+      "mmerԑeԑ"
+    ]
+  },
+  HAU: {
+    sentences: [
+      "Don Allah, taimake ni",
+      "Ina bukatar likita",
+      "Kira nas yenzu",
+      "Wannan gaggawa ne",
+      "Ina jin zafi",
+      "Wani yana zubar da jini",
+      "Kira motar asibiti",
+      "Ka kai ni asibiti",
+      "Ina jin rauni",
+      "Ba zan iya numfashi da kyau ba",
+      "Za ka iya kiran motar asibiti?",
+      "Jinin sukari na ya yi yawa",
+      "Don Allah a duba ko matsin jini na yana daidai",
+      "Ba zan iya tsayuwa ba",
+      "Ina jin ciwon kirji",
+      "Ina da zazzabi",
+      "Kai na na ciwo",
+      "Ina tari",
+      "Makogwaro na na ciwo",
+      "Kirji na yana matsewa",
+      "Ina jin jiri",
+      "Ciki na na ciwo",
+      "Ina amai",
+      "Ina jin sanyi",
+      "Ina da gudawa",
+      "Ina da ciwon kai da zazzabi",
+      "Magani na yana sa min ciwon ciki",
+      "Ina jin jiri idan na tsaya",
+      "Ina bukatar maganin rage zafi",
+      "Magani na ya kare",
+      "Ina tunanin malaria nake da ita",
+      "Ina da hawan jini",
+      "Ina da ciwon sikila",
+      "Ina da cutar asma",
+      "Ina da rauni",
+      "Ciwon da ke ciki ya dawo",
+      "Ina jin jini na ya yi ƙasa",
+      "Ina tunanin typhoid ce",
+      "Ina jin ciwo a jiki",
+      "Jaririna na da kuraje",
+      "Ina da rashin jituwa da maganin penicillin",
+      "Ina son ganin likitan yara",
+      "Yaron na da masassarar mashako",
+      "Jaririna baya ci abinci",
+      "Jaririn na da zazzabi",
+      "Zauna nan",
+      "Kwanta a kan gado",
+      "Bude bakinka",
+      "Sha wannan magani",
+      "Kada ka ci abinci tukuna",
+      "Sha ruwa da yawa",
+      "Dawo gobe",
+      "Wanke hannunka",
+      "Saka abin rufe fuska",
+      "Cire takalmanka",
+      "Sha kwayar bayan cin abinci",
+      "Kada ka rasa kashi na magani",
+      "Taimaka mini in karanta lakabin magani",
+      "Shin ina bukatar in sha magani kafin cin abinci?",
+      "Ka sha maganinka akan lokaci",
+      "Likita yana zuwa",
+      "Jinya za ta taimake ka",
+      "Jira lokacin ka",
+      "Ka riga ka ga likita?",
+      "Likita yana cikin aiki",
+      "Jinya za ta sa hannu a rauninka",
+      "Likita ya ce za ka samu lafiya",
+      "Jinya za ta yi maka allura",
+      "Likita ya rubuta kwaya",
+      "Jinya za ta auna zafin jikinka",
+      "Jinya ta ce bai kamata in rasa wani kashi ba",
+      "Zan iya yin magana da likita?",
+      "Likita yana nan yanzu?",
+      "Jinya ta ce in zo yau",
+      "Don Allah, sake bayyana mini abin da kuka gano game da cutata",
+      "Je zuwa kantin magani",
+      "Karɓi magungunanka",
+      "Ka sha wannan sau ɗaya a rana",
+      "Kada ka rasa kashi na magani",
+      "Za ka sha wannan na tsawon kwanaki biyar",
+      "Ka dawo idan ta kara muni",
+      "Shin kantin magani a buɗe yake?",
+      "Nawa ne maganin?",
+      "Wannan don ciwo ne",
+      "Ina bukatar sabon rubutaccen magani",
+      "Maganina ya ƙare",
+      "Don Allah, nuna mini hanyar zuwa kantin magani",
+      "Ina bukatar taimako da maganina",
+      "Ina ɗakin daukar hoton ciki (scan)?",
+      "Na rasa fayil ɗin asibitina",
+      "Ɗana/‘yata ba ya lafiya",
+      "Jaririn yana da zazzabi",
+      "Ina son ganin likitan yara",
+      "Jaririna baya cin abinci",
+      "Ta na da juna biyu",
+      "Ina cikin nakuda",
+      "Ina bukatar kulawar ciki (antenatal)",
+      "Yaron yana da masassarar shan inna",
+      "Ina son tsarin iyali",
+      "Jaririna yana kuka sosai",
+      "Ina ɗakin haihuwa?",
+      "Zan iya yin scan yau?",
+      "Ina bukatar a tura ni zuwa kwararre",
+      "Yaushe ne alƙawarina na gaba?",
+      "Jinya za ta kira sunanka",
+      "Ina son a duba lafiyata",
+      "Na zo yin gwajin jini",
+      "Ina bukatar a duba matakin sukari na",
+      "Sakamakon bai shirya ba tukuna",
+      "Je a duba hawan jininka",
+      "Dakin gwaje-gwaje yana dama",
+      "Za mu duba nauyinka",
+      "Likita yana bukatar rahotinka",
+      "Ina da sakamakon gwaje-gwajena",
+      "Ina ɗakin yin scan?",
+      "Ina zan je domin yin gwajin dakin gwaje-gwaje?",
+      "Ina bukatar maganin rage ciwo",
+      "Likita ya sanya hannu a fom ɗinka",
+      "Raunin yana warkewa",
+      "Za ka samu lafiya ba da jimawa ba",
+      "Je ɗaki na biyar",
+      "Dakin ganawa cike yake",
+      "An rasa fayil ɗinka",
+      "Layin yana da tsawo",
+      "Ina OPD yake?",
+      "Duba lambar fayil ɗinka",
+      "Je ofishin rikodi",
+      "Yi rajista a ofishin gaba",
+      "Zauna a wurin jiran aiki",
+      "Jinya za ta kira sunanka",
+      "Wannan katin inshorar lafiyata ne",
+      "Ina dakin yara yake?",
+      "Likita ya rubuta maka kwaya",
+      "Ina da sakamakon gwaje-gwajena",
+      "Likita ya rubuta maka kwaya",
+      "Yanzu zaka iya komawa gida",
+      "Ka dawo mako mai zuwa",
+      "Kana bukatar karin hutu",
+      "Ka sha magungunanka akan lokaci",
+      "Raunin yana warkewa",
+      "Za ka samu lafiya ba da jimawa ba",
+      "Kada ka manta da duba lafiyarka na gaba",
+      "Bari wani ya taimaka maka",
+      "An sallame ka daga asibiti",
+      "Likita ya sanya hannu a fom ɗinka",
+      "Taimaka mini in karanta lakabin magani",
+      "Jira lokacin ka",
+      "Ina bukatar taimako da maganina",
+      "Don Allah, ka kai ni asibiti",
+      "Ina jin rauni"
+    ],
+    keywords: [
+      "Taimako",
+      "Likita",
+      "Nas",
+      "Gaggawa",
+      "Zafi",
+      "Jini",
+      "Motar Asibiti",
+      "Asibiti",
+      "Rauni",
+      "Numfashi",
+      "Neman kulawar likita",
+      "Jinin sukari",
+      "Matsin jini",
+      "Gaggawa",
+      "Ciwon kirji",
+      "Zazzabi",
+      "Ciwon kai",
+      "Tari",
+      "Ciwon makogwaro",
+      "Matsin kirji",
+      "Jiri",
+      "Ciwon ciki",
+      "Amai",
+      "Sanyi",
+      "Gudawa",
+      "Alamomi",
+      "Magani",
+      "Jin amai",
+      "Rage zafi",
+      "Karancin magani",
+      "malaria",
+      "blood pressure",
+      "diabetes",
+      "asthma",
+      "wound",
+      "ulcer",
+      "low blood",
+      "typhoid",
+      "body pain",
+      "rash",
+      "allergy",
+      "pediatrician",
+      "measles",
+      "no appetite",
+      "fever",
+      "Zauna",
+      "Kwanta",
+      "Bude",
+      "Magani",
+      "Abinci",
+      "Ruwa",
+      "Dawowa",
+      "Wanke",
+      "Maski",
+      "Takalma",
+      "Kwaya",
+      "Kashi / Dose",
+      "Karanta",
+      "Magani",
+      "Lokaci",
+      "Likita",
+      "Jinya",
+      "Jira",
+      "Gani",
+      "Aiki / Cikin aiki",
+      "Rauni",
+      "Sakon likita",
+      "Allura",
+      "Kwaya",
+      "Zazzabi / Yanayin jiki",
+      "Rubutaccen umarni",
+      "Magana",
+      "Akwai?",
+      "Alƙawari",
+      "Bayani",
+      "Pharmacy",
+      "Karɓa",
+      "Yawan sha",
+      "Gargadi",
+      "Lokaci",
+      "Matsalar lafiya",
+      "Buɗe",
+      "Farashi",
+      "Ciwo",
+      "Sabuntawa",
+      "Cika",
+      "Nemo",
+      "Taimako",
+      "Scan",
+      "Fayil",
+      "Yaro",
+      "Jariri",
+      "Likitan yara",
+      "Abinci",
+      "Juna biyu / Ciki",
+      "Nakuda",
+      "Antenatal",
+      "Shan inna",
+      "Tsarin iyali",
+      "Kuka",
+      "Haihuwa",
+      "Scan",
+      "Mikawa",
+      "Alƙawari",
+      "Sashen haihuwa/ward",
+      "Dubawa",
+      "Gwajin jini",
+      "Matakin sukari",
+      "Sakamako",
+      "Hawan jini",
+      "Dama",
+      "Nauyi",
+      "Rahoto",
+      "Sakamako na gwaji",
+      "Scan",
+      "Gwaji",
+      "Ciwo",
+      "Sa hannu",
+      "Warkewa",
+      "Lafiya",
+      "Daki",
+      "Dakin ganawa",
+      "Rasa",
+      "Layi",
+      "Hanya",
+      "Lamba",
+      "Rikodi",
+      "Rajista",
+      "Jiran aiki",
+      "Suna",
+      "Inshora",
+      "Sashen yara",
+      "Likita",
+      "Sakamako",
+      "Likita",
+      "Sallama",
+      "Dawowa",
+      "Hutu",
+      "Lokaci",
+      "Rauni",
+      "Lafiya",
+      "Bita",
+      "Taimako",
+      "Sallama",
+      "Fom",
+      "Lakabi",
+      "Haƙuri",
+      "Taimako",
+      "Asibiti",
+      "Rauni"
+    ]
+  },
+  GA: {
+    sentences: [
+      "Ofainɛ wa mi",
+      "Miihia darɛfonyo.",
+      "Tsɛ nɛɛsi lɛ amrɔ.",
+      "Eji nɔ ko ni hia kwɛmɔ nɔŋŋ",
+      "Miipiŋ",
+      "Mɔ ko miiho la.",
+      "Tsɛ ambulansi lɛ.",
+      "Kɛ mi aya helatsamɔhe lɛ.",
+      "Minuɔ he akɛ migbɔjɔ.",
+      "Minyɛɛɛ mamu jogbaŋŋ.",
+      "Obaanyɛ otsɛ ambulansi lɛ?",
+      "Sikli ni yɔɔ mila mli lɛ fa fe bɔ ni sa.",
+      "Ofainɛ kwɛmɔ kɛji mila etee ŋwɛi tsɔ loo eyɛ bɔ ni sa.",
+      "Minyɛɛɛ madamɔ shi.",
+      "Mitsitsi miiwa mihe.",
+      "Mihe edɔ ni fɛi miiye mi.",
+      "Miyitso miigba mi",
+      "Miiwɔlɔ",
+      "Misɛŋ efee fala",
+      "Mitsitsi mli efi",
+      "Mihiɛ miidi mi.",
+      "Mimusuŋ miikɔ mi",
+      "Miishwe.",
+      "Fɛi miiye mi.",
+      "Mimusuŋ etsɔ.",
+      "Miyitso miigba mi ni mihe edɔ ni fɛi hu miiye mi.",
+      "Tsofa ni aha mi lɛ eha mimusu miiwa mihe.",
+      "Mihiɛ diɔ mi kɛji midamɔ shi.",
+      "Mihia tsofa ni baaha mipiŋmɔ lɛ naa aba shi.",
+      "Mitsofa lɛ eta.",
+      "Efeɔ mi akɛ mina atiridii.",
+      "Mila etee ŋwɛi.",
+      "Mina sikli hela.",
+      "Miiye fɛfɛ hela.",
+      "Mina fala.",
+      "Misusuŋ fala lɛ eba ekoŋŋ.",
+      "Efeɔ ni akɛ mila eba shi tsɔ.",
+      "Efeɔ mi akɛ taifɔid ni.",
+      "Mihewojiaŋ miiwa mihe.",
+      "Gbɛ eshwie mibi lɛ he.",
+      "Kɛji mikɔ pɛnisilin (penicillin) lɛ, ehaa mi nagbai",
+      "Masumɔ akɛ mana datrɛfonyo ni kwɛɔ gbekɛbii lɛ.",
+      "Gbekɛ lɛ ena osɛgɛɛ",
+      "Mibi lɛ yeee nii.",
+      "Abifao lɛ he edɔ.",
+      "Ta shi yɛ biɛ.",
+      "Ka saatso lɛ nɔ.",
+      "Gbelemɔ onaabu.",
+      "Kɔ tsofa nɛɛ.",
+      "Kaaye nii da.",
+      "Nuu nu pii.",
+      "Kuu osɛɛ kɛba wɔ.",
+      "Fɔ ode",
+      "Woo ohiɛhaanɔ",
+      "Jiemɔ ospaatere lɛ.",
+      "Kɔ tsofa",
+      "Kaaha ohiɛ kpa be kɛ bɔ ni esa ni okɔ tsofa lɛ nɔ.",
+      "Wa mi kɛkane nɔ ni aŋma yɛ tsofa nɛɛ he",
+      "Ani esa ni mikɔ tsofa lɛ dani miye nii.",
+      "Kɔ otsofai lɛ yɛ be nɔ.",
+      "Datrɛfonyo lɛ miiba.",
+      "Nɛɛsifonyo lɛ baawa bo.",
+      "Mɛɛ ni ashɛ onɔ.",
+      "Ani ona datrɛfonyo lɛ?",
+      "Datrɛfonyo lɛ bɛ deka bianɛ.",
+      "Nɛɛsifonyo lɛ baanyɛmɔ ofala lɛ",
+      "Datrɛfonyo lɛ kɛɛ nɔ fɛɛ nɔ baafee jogbaŋŋ eha bo",
+      "Nɛɛsifonyo lɛ baagbu bo (abui).",
+      "Datrɛfonyo lɛ eŋma tsofa",
+      "Nɛɛsifonyo lɛ baakwɛ ohe edɔ eha.",
+      "Nɛɛsifonyo lɛ kɛɛ mihiɛ akakpa be kɛ bɔ ni esa ni makɔ tsofai lɛ eko eko nɔ.",
+      "Manyɛ mikɛ datrɛfonyo lɛ awie?",
+      "Ani datrɛfonyo lɛ he eba deka bianɛ",
+      "Nɛɛsifonyo lɛ kɛɛ miba ŋmɛnɛ.",
+      "Ofanɛ ni ogbala mli kɛtsɔɔ mi nɔ ni feɔ mi ekoŋŋ",
+      "Yaa tsofahamɔhe lɛ.",
+      "Hemɔ otsofai lɛ.",
+      "Kɔ enɛ shi kome daa gbi.",
+      "Kaaha ohiɛ kpa be kɛ bɔ ni esa ni okɔ tsofai lɛ nɔ.",
+      "Obaakɔ enɛ gbii enumɔ.",
+      "Kuu osɛɛ kɛba kɛji hela lɛ mli wo wu.",
+      "Ani agbele tsofahamɔhe lɛ?",
+      "Tsofa lɛ enyiɛ",
+      "Enɛ haa piŋmɔ naa baa shi.",
+      "Mihia tsofa hee",
+      "Mitsofa lɛ eta.",
+      "Ofainɛ tsɔɔmɔ mi gbɛ kɛya tsofahamɔhe lɛ",
+      "Mihia wamɔ yɛ mitsofa lɛ he",
+      "Nɛgbɛ he ni afeɔ sikaani lɛ yɔɔ?",
+      "Milaaje mihelatsamɔhebaa wolo",
+      "Mibi lɛ bɛ hewalɛ",
+      "Abifao lɛ he edɔ.",
+      "Masumɔ akɛ mana datrɛfonyo ni kwɛɔ gbekɛbii lɛ.",
+      "Mibi lɛ yeee nii.",
+      "Ehiɛ hɔ",
+      "Miikɔmɔ.",
+      "Mihia kwɛmɔ yɛ hɔŋɔɔ mli.",
+      "Gbekɛ lɛ ena osɛgɛɛ",
+      "Miitao ni afee weku he gbɛjianɔtoo tsofa aha mi.",
+      "Mibi lɛ miifo tsɔ.",
+      "Nɛgbɛ yeihɔlɔi kɛ yeifɔyei ashikamɔhe",
+      "Abaanyɛ afee sikaani lɛ aha mi ŋmɛnɛ?",
+      "Masumɔ ni ajie mi kɛya datrɛfonyo ni ena tsosemɔ kɛha hela nɛɛ kwɛmɔ ŋɔɔ.",
+      "Mɛɛ be esa ni mibana bo ekoŋŋ?",
+      "Nɛɛsifonyo lɛ baatsɛ ogbɛi.",
+      "Masumɔ akɛ mikwɛ mihewijiaŋ aha mi",
+      "Miba koni akwɛ mila mli.",
+      "Miitao ni akwɛ sikli falɛ yɛ mila mli.",
+      "Agbeko nɔ ni afeɔ lɛ naa.",
+      "Yaa ni akwɛ ola falɛ.",
+      "Laabu lɛ yɛ onine jurɔ gbɛ.",
+      "Wɔbaakwɛ otsiimɔ.",
+      "Datrɛfonyo lɛ hia owolo",
+      "Mihiɛ milaabu woji lɛ.",
+      "Nɛgbɛ he ni afeɔ sikaani lɛ yɔɔ?",
+      "Nɛgbɛ miyafee milaabu kaa lɛ yɛ?",
+      "Mihia tsofa ni baaha mipiŋmɔ lɛ naa aba shi.",
+      "Datrɛfonyo lɛ kɛ enine ewo owolo lɛ shishi",
+      "Fala lɛ miigbo.",
+      "Nɔ fɛɛ nɔ baafee jogbaŋŋ eha bo",
+      "Yaa tsu ni ji enumɔ lɛ mli.",
+      "Tsu mli ni anaa datrɛfonyo yɛ lɛ eyi.",
+      "Ohalatsamɔhebaa wolo",
+      "Liamɔ",
+      "Nɛgbɛ OPD lɛ yɔɔ?",
+      "Kwɛmɔ yibɔ ni yɔɔ ohelatsamɔhebaa wolo",
+      "Yaa tsu mli he ni akɔɔ helatsamɔhebaa wolo lɛ yɛ",
+      "Yaa ni aŋma ogbɛi yɛ okpɔlɔ ni ma hiɛ lɛ he.",
+      "Ta he ni ataa kɛmɛɔ yɛ lɛ.",
+      "Nɛɛsifono lɛ baatsɛ ogbɛi.",
+      "Mihelatsamɔhe inshɔransi kaadi lɛ nɛ",
+      "Nɛgbɛ gbekɛbii ashikamɔhe",
+      "Be enyiɛ maye kɛmɛ datrɛfonyo lɛ?",
+      "Mihiɛ milaabu woji lɛ.",
+      "Datrɛfonyo lɛ eŋma tsofa",
+      "Obaanyɛ oya shia agbɛnɛ.",
+      "Kuu osɛɛ kɛba nmɛnɛ otsi.",
+      "Esa ni ona hejɔɔmɔ pii",
+      "Kɔ otsofai lɛ yɛ be nɔ",
+      "Fala lɛ miigbo.",
+      "Etsɛŋ ni nɔ fɛɛ nɔ baahi aha bo.",
+      "Ohiɛ akakpa nɔ ni oku osɛɛ kɛba ni akwɛ bɔ ni nibii yaa lɛ ha bo",
+      "Ha ni mɔ ko awa bo",
+      "Ajie bo kɛjɛ helatsamɔhe lɛ.",
+      "Datrɛfonyo lɛ kɛ enine ewo owolo lɛ shishi",
+      "Wa mi kɛkane nɔ ni aŋma yɛ tsofa lɛ nɔ.",
+      "Mɛɛ ni ashɛ onɔ.",
+      "Mihia wamɔ yɛ mitsofa lɛ he",
+      "Ofainɛ ni okɛ mi aya helatsamɔhe",
+      "Migbɔjɔ."
+    ],
+    keywords: [
+      "Wamɔ",
+      "Datrɛfonyo",
+      "Nɛɛsi",
+      "Nɔ ko ni hia kwɛmɔ nɔŋŋ",
+      "Piimɔ",
+      "Lahoo",
+      "ambulansi",
+      "Helatsamɔhe",
+      "Gbɔjɔ",
+      "Mu",
+      "tsofahamɔ kɛ kwɛmɔ",
+      "sikli ni yɔɔ la mli",
+      "la falɛ",
+      "Ehia kwɛmɔ amrɔ nɔŋŋ",
+      "tsitsihewaa",
+      "Hedɔlɛ kɛ fɛi",
+      "Yitsogbamɔ",
+      "Wɔlɔmɔ",
+      "Sɛŋ fala",
+      "tsitsimlifimɔ",
+      "Hiɛdimɔ",
+      "Musuŋkɔmɔ",
+      "shwee",
+      "fɛi",
+      "Musuŋtsɔmɔ",
+      "okadii ni tsɔɔ akɛ nɔ ko miifee mɔ ko",
+      "tsofa",
+      "tsuinaa funtamɔ",
+      "tsofa ni haa piŋmɔ naa baa shi",
+      "mlifu",
+      "atiridii",
+      "la etee ŋwɛi",
+      "sikli hela",
+      "fɛfɛ",
+      "fala",
+      "musuŋ fala",
+      "la ni eba shi",
+      "alɛji",
+      "piŋmɔ yɛ hewojiaŋ",
+      "gbɛ",
+      "alɛji",
+      "datrɛfonyo ni kwɛɔ gbekɛbii",
+      "osɛgɛɛ",
+      "daŋ tseee lɛ",
+      "hedɔlɛ",
+      "ta shi",
+      "ka shi",
+      "hemɔ",
+      "tsofa",
+      "ye",
+      "nu",
+      "kuu osɛɛ",
+      "odɛŋ",
+      "ohiɛhaanɔ",
+      "aspaatere",
+      "tsofa",
+      "be kɛ bɔ ni esa ni okɔ tsofa",
+      "Kanemɔ",
+      "tsofa",
+      "be",
+      "datrɛfonyo",
+      "Nɛɛsifonyo",
+      "mɛɛ",
+      "na",
+      "bɛ deka bianɛ",
+      "fala",
+      "helamlitaomɔ",
+      "gbuu",
+      "tsofa",
+      "hedɔlɛ",
+      "tsofa",
+      "wie",
+      "he eba deka",
+      "betoo kɛha nɛɛsifonyo naa",
+      "gbala mli",
+      "tsofahamɔhe",
+      "hemɔ",
+      "shii abɔ",
+      "kɔkɔbɔɔ",
+      "be",
+      "hewojiaŋ ehiii",
+      "gbelemɔ",
+      "jara",
+      "piŋmɔ",
+      "eheehamɔ",
+      "eheehamɔ",
+      "taomɔ",
+      "wamɔ",
+      "sikaani",
+      "helatsamɔhebaa wolo",
+      "bi",
+      "abifao",
+      "datrɛfonyo ni kwɛɔ gbekɛbii",
+      "niyeli",
+      "hiɛ hɔ",
+      "kɔɔmɔ",
+      "kwɛmɔ yɛ hɔŋɔɔ mli",
+      "osɛgɛɛ",
+      "gbɛjianɔtoo",
+      "miifo",
+      "yeihɔlɔi kɛ yeifɔyei",
+      "sikaani",
+      "betoo kɛha datrɛfonyo naa",
+      "mɔ jiemɔ kɛya helatsamɔhe kroko",
+      "helatsɛmɛi ashikamɔhe",
+      "hewojiaŋkwɛmɔ",
+      "lamlikwɛmɔ",
+      "sikli falɛ",
+      "nɔ ni ana yɛ nɔ ni afee lɛ mli",
+      "la falɛ",
+      "nine jurɔ",
+      "tsiimɔ",
+      "wolo",
+      "laabu",
+      "sikaani",
+      "kaa",
+      "piŋmɔ",
+      "kadi",
+      "miigbo",
+      "jogbaŋŋ",
+      "tsu",
+      "datrɛfonyonaa",
+      "laaje",
+      "liamɔ",
+      "gbɛtsɔɔmɔ",
+      "yibɔ",
+      "he ni akɔɔ helatsamɔhebaa wolo",
+      "okpɔlɔ",
+      "mɛɛ",
+      "gbɛi",
+      "inshɔransi kaadi",
+      "gbɛtsɔɔmɔ",
+      "be sɛɛtsɛlɛ",
+      "laabu woji",
+      "datrɛfonyo",
+      "jiemɔ kɛjɛ helatsamɔhe",
+      "kuu osɛɛ kɛbɛ",
+      "hejɔɔmɔ",
+      "be nɔ",
+      "fala",
+      "etsɛŋ",
+      "bɔ ni nibii yaa lɛ kwɛmɔ",
+      "wa",
+      "ya shia",
+      "kadi",
+      "niŋmaa",
+      "tsuishitoo",
+      "hekɛmɔnɔfɔɔ",
+      "helatsamɔhe",
+      "gbɔjɔ"
+    ]
+  }
+};
+
+function onLangChange() {
+  const lang = document.getElementById('language').value;
+  const el = document.getElementById('scriptStatus');
+  if (!lang) { el.style.display = 'none'; return; }
+  if (SCRIPTS[lang]) {
+    el.style.display = 'block';
+    el.style.background = 'var(--accent-light)';
+    el.style.color = 'var(--accent)';
+    el.textContent = `Script loaded: 150 sentences and 150 keywords ready for ${lang}.`;
+  } else {
+    el.style.display = 'block';
+    el.style.background = 'var(--amber-light)';
+    el.style.color = 'var(--amber)';
+    el.textContent = `Script for ${lang} not yet available. Contact the coordinator.`;
+  }
+}
+
+async function startSession() {
+  const pid = document.getElementById('participantId').value.trim().toUpperCase();
+  const lang = document.getElementById('language').value;
+  const cid = document.getElementById('clientId').value.trim();
+  const fid = document.getElementById('folderId').value.trim();
+
+  if (!pid || !lang || !cid || !fid) {
+    alert('Please fill in all fields.');
+    return;
+  }
+
+  if (!SCRIPTS[lang]) {
+    alert(`The script for ${lang} is not yet available. Please select English or contact the coordinator.`);
+    return;
+  }
+
+  state.participantId = pid;
+  state.language = lang;
+  state.sentences = SCRIPTS[lang].sentences;
+  state.keywords = SCRIPTS[lang].keywords;
+  state.clientId = cid;
+  state.folderId = fid;
+  state.phase = 'sentences';
+  state.index = 0;
+  state.take = 1;
+
+  await signInGoogle();
+  showScreen('record');
+  renderItem();
+}
+
+function signInGoogle() {
+  return new Promise((res) => {
+    if (state.accessToken) { res(); return; }
+    const client = google.accounts.oauth2.initTokenClient({
+      client_id: state.clientId,
+      scope: 'https://www.googleapis.com/auth/drive.file',
+      callback: (resp) => {
+        state.accessToken = resp.access_token;
+        res();
+      }
+    });
+    client.requestAccessToken();
+  });
+}
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+}
+
+function getCurrentItems() {
+  return state.phase === 'sentences' ? state.sentences : state.keywords;
+}
+
+function getFileName(take) {
+  const t = take || state.take;
+  const type = state.phase === 'sentences' ? 'S' : 'K';
+  const num = String(state.index + 1).padStart(3, '0');
+  return `${state.participantId}_${state.language}_${type}${num}_T${t}.wav`;
+}
+
+function renderItem() {
+  const items = getCurrentItems();
+  const item = items[state.index];
+  const isSentence = state.phase === 'sentences';
+  const total = state.index + (isSentence ? 0 : 150);
+  const pct = Math.round((total / 300) * 100);
+
+  document.getElementById('sessionLabel').textContent = `${state.participantId} · ${state.language}`;
+  document.getElementById('phaseTitle').textContent = isSentence ? 'Sentences' : 'Keywords';
+  document.getElementById('counterLabel').textContent = `${state.index + 1} / 150`;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${total} / 300 total`;
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('fileBadge').textContent = getFileName();
+  document.getElementById('uploadStatus').style.display = 'none';
+  document.getElementById('uploadStatus').className = 'upload-status';
+
+  document.getElementById('tab-sentences').className = 'phase-tab' + (isSentence ? ' active' : ' done');
+  document.getElementById('tab-keywords').className = 'phase-tab' + (!isSentence ? ' active' : '');
+
+  const promptText = document.getElementById('promptText');
+  const promptHint = document.getElementById('promptHint');
+
+  if (isSentence) {
+    promptText.className = 'prompt-text';
+    promptText.textContent = item;
+    promptHint.textContent = 'Read naturally at a comfortable pace';
+  } else {
+    promptText.className = 'prompt-keyword';
+    promptText.textContent = item;
+    promptHint.textContent = 'Say the word twice with a short pause between';
+  }
+
+  state.take = 1;
+  state.audioBlob = null;
+  state.audioUrl = null;
+  setRecordingUI('idle');
+}
+
+function setRecordingUI(mode) {
+  const btn = document.getElementById('recordBtn');
+  const icon = document.getElementById('recIcon');
+  const status = document.getElementById('recStatus');
+  const retake = document.getElementById('retakeBtn');
+  const play = document.getElementById('playBtn');
+  const next = document.getElementById('nextBtn');
+
+  if (mode === 'idle') {
+    btn.className = 'record-btn';
+    icon.innerHTML = '<circle cx="12" cy="12" r="6" fill="white"/>';
+    status.textContent = 'Tap to start recording';
+    status.className = 'rec-status';
+    retake.disabled = true;
+    play.disabled = true;
+    next.disabled = true;
+  } else if (mode === 'recording') {
+    btn.className = 'record-btn recording';
+    icon.innerHTML = '<rect x="8" y="8" width="8" height="8" rx="1" fill="white"/>';
+    status.textContent = 'Recording… tap to stop';
+    status.className = 'rec-status recording';
+    retake.disabled = true;
+    play.disabled = true;
+    next.disabled = true;
+  } else if (mode === 'done') {
+    btn.className = 'record-btn has-audio';
+    icon.innerHTML = '<circle cx="12" cy="12" r="6" fill="white"/>';
+    status.textContent = 'Recording saved — review or continue';
+    status.className = 'rec-status done';
+    retake.disabled = false;
+    play.disabled = false;
+    next.disabled = false;
+  }
+}
+
+async function toggleRecord() {
+  if (state.isRecording) {
+    stopRecording();
+  } else {
+    await startRecording();
+  }
+}
+
+async function startRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        sampleRate: state.sampleRate,
+        channelCount: 1,
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false
+      }
+    });
+
+    const ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: state.sampleRate });
+    const source = ctx.createMediaStreamSource(stream);
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 256;
+    source.connect(analyser);
+    state.analyser = analyser;
+    state.audioContext = ctx;
+    state.stream = stream;
+
+    drawWave();
+
+    state.audioChunks = [];
+    const mr = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+    mr.ondataavailable = e => { if (e.data.size > 0) state.audioChunks.push(e.data); };
+    mr.onstop = () => finishRecording();
+    mr.start();
+    state.mediaRecorder = mr;
+    state.isRecording = true;
+    setRecordingUI('recording');
+  } catch(e) {
+    alert('Microphone access denied. Please allow microphone permission and try again.');
+  }
+}
+
+function stopRecording() {
+  if (state.mediaRecorder && state.isRecording) {
+    state.mediaRecorder.stop();
+    state.stream.getTracks().forEach(t => t.stop());
+    state.isRecording = false;
+    cancelAnimationFrame(state.animFrame);
+    clearWave();
+  }
+}
+
+function finishRecording() {
+  const blob = new Blob(state.audioChunks, { type: 'audio/webm' });
+  state.audioBlob = blob;
+  state.audioUrl = URL.createObjectURL(blob);
+  setRecordingUI('done');
+}
+
+function drawWave() {
+  const canvas = document.getElementById('waveCanvas');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.offsetWidth;
+  const h = 48;
+  canvas.width = w;
+  canvas.height = h;
+
+  function draw() {
+    state.animFrame = requestAnimationFrame(draw);
+    const buf = new Uint8Array(state.analyser.frequencyBinCount);
+    state.analyser.getByteTimeDomainData(buf);
+    ctx.clearRect(0, 0, w, h);
+    ctx.strokeStyle = '#1A6B4A';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    const step = w / buf.length;
+    buf.forEach((v, i) => {
+      const y = (v / 128) * (h / 2);
+      i === 0 ? ctx.moveTo(0, y) : ctx.lineTo(i * step, y);
+    });
+    ctx.stroke();
+  }
+  draw();
+}
+
+function clearWave() {
+  const canvas = document.getElementById('waveCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function playback() {
+  if (!state.audioUrl) return;
+  const audio = new Audio(state.audioUrl);
+  audio.play();
+}
+
+function retake() {
+  state.take += 1;
+  document.getElementById('fileBadge').textContent = getFileName();
+  state.audioBlob = null;
+  state.audioUrl = null;
+  setRecordingUI('idle');
+  clearWave();
+  document.getElementById('uploadStatus').style.display = 'none';
+}
+
+async function nextItem() {
+  if (!state.audioBlob) return;
+
+  await uploadToGDrive();
+
+  const items = getCurrentItems();
+  if (state.index < items.length - 1) {
+    state.index += 1;
+    renderItem();
+  } else if (state.phase === 'sentences') {
+    state.phase = 'keywords';
+    state.index = 0;
+    renderItem();
+  } else {
+    document.getElementById('doneParticipant').textContent = state.participantId;
+    document.getElementById('doneLang').textContent = state.language;
+    showScreen('done');
+  }
+}
+
+function prevItem() {
+  if (state.index > 0) {
+    state.index -= 1;
+    renderItem();
+  } else if (state.phase === 'keywords') {
+    state.phase = 'sentences';
+    state.index = 149;
+    renderItem();
+  }
+}
+
+async function uploadToGDrive() {
+  const statusEl = document.getElementById('uploadStatus');
+  statusEl.className = 'upload-status uploading';
+  statusEl.textContent = 'Uploading to Google Drive…';
+
+  try {
+    const subFolder = state.phase === 'sentences' ? 'Sentences' : 'Keywords';
+    const parentFolderId = await ensureFolder(`${state.participantId}_${state.language}`, state.folderId);
+    const subFolderId = await ensureFolder(subFolder, parentFolderId);
+
+    const fileName = getFileName();
+    const metadata = { name: fileName, parents: [subFolderId] };
+    const form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+    form.append('file', state.audioBlob, fileName);
+
+    const resp = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${state.accessToken}` },
+      body: form
+    });
+
+    if (resp.ok) {
+      statusEl.className = 'upload-status success';
+      statusEl.textContent = `Uploaded: ${fileName}`;
+    } else {
+      throw new Error(await resp.text());
+    }
+  } catch(e) {
+    statusEl.className = 'upload-status error';
+    statusEl.textContent = 'Upload failed — check connection and try again';
+    console.error(e);
+  }
+}
+
+const folderCache = {};
+
+async function ensureFolder(name, parent) {
+  const key = `${parent}/${name}`;
+  if (folderCache[key]) return folderCache[key];
+
+  const query = `name='${name}' and '${parent}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+  const searchResp = await fetch(
+    `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id)`,
+    { headers: { Authorization: `Bearer ${state.accessToken}` } }
+  );
+  const searchData = await searchResp.json();
+
+  if (searchData.files && searchData.files.length > 0) {
+    folderCache[key] = searchData.files[0].id;
+    return folderCache[key];
+  }
+
+  const createResp = await fetch('https://www.googleapis.com/drive/v3/files', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${state.accessToken}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ name, mimeType: 'application/vnd.google-apps.folder', parents: [parent] })
+  });
+  const created = await createResp.json();
+  folderCache[key] = created.id;
+  return created.id;
+}
+
+function resetSession() {
+  Object.assign(state, {
+    participantId: '', language: '', sentences: [], keywords: [],
+    phase: 'sentences', index: 0, take: 1, audioBlob: null,
+    audioUrl: null, accessToken: null
+  });
+  showScreen('setup');
+}
+</script>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</body>
+</html>
