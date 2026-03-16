@@ -2051,13 +2051,31 @@ var tokenClient = null;
 
 // ── Boot ───────────────────────────────────────────────────────────────────
 
+function parseTokenFromHash() {
+  var hash = window.location.hash.substring(1);
+  if (!hash) return null;
+  var params = {};
+  hash.split('&').forEach(function(part) {
+    var kv = part.split('=');
+    if (kv.length >= 2) params[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]);
+  });
+  return params['access_token'] || null;
+}
+
 function boot() {
-  // Restore any saved session (e.g. after token refresh)
   var savedPid   = sessionStorage.getItem('cs_pid');
   var savedLang  = sessionStorage.getItem('cs_lang');
-  var savedToken = sessionStorage.getItem('cs_token');
   var savedPhase = sessionStorage.getItem('cs_phase') || 'sentences';
   var savedIndex = parseInt(sessionStorage.getItem('cs_index') || '0', 10);
+
+  // Check if returning from Google OAuth redirect (token in URL hash)
+  var hashToken = parseTokenFromHash();
+  if (hashToken) {
+    sessionStorage.setItem('cs_token', hashToken);
+    history.replaceState(null, '', window.location.pathname);
+  }
+
+  var savedToken = hashToken || sessionStorage.getItem('cs_token');
 
   if (savedPid && savedLang && savedToken && SCRIPTS[savedLang]) {
     state.participantId = savedPid;
