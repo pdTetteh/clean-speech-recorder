@@ -2739,7 +2739,6 @@ function beginSession() {
   if (!pid)  { notice.className="notice show bad"; notice.textContent="Please enter your Participant ID."; return; }
   if (!lang) { notice.className="notice show bad"; notice.textContent="Please select a language."; return; }
   if (!SCRIPTS[lang]) { notice.className="notice show bad"; notice.textContent="Script for " + lang + " not yet available."; return; }
-  if (typeof google === "undefined" || !google.accounts) { notice.className="notice show bad"; notice.textContent="Google sign-in is still loading. Please wait a moment and try again."; return; }
   doGoogleSignIn(pid, lang);
 }
 
@@ -2758,6 +2757,11 @@ function getFileName() {
 }
 
 function renderItem() {
+  // Always ensure arrays are populated
+  if (!state.sentences.length && SCRIPTS[state.language]) {
+    state.sentences = SCRIPTS[state.language].sentences;
+    state.keywords  = SCRIPTS[state.language].keywords;
+  }
   var isSentence = state.phase === "sentences";
   var items  = isSentence ? state.sentences : state.keywords;
   var total  = state.index + (isSentence ? 0 : 150);
@@ -2917,6 +2921,11 @@ function retake() {
 
 async function nextItem() {
   if (!state.audioBlob) return;
+  // Always ensure arrays are populated (guard against empty state after redirect)
+  if (!state.sentences.length && SCRIPTS[state.language]) {
+    state.sentences = SCRIPTS[state.language].sentences;
+    state.keywords  = SCRIPTS[state.language].keywords;
+  }
   await uploadToGDrive();
   var items = state.phase === "sentences" ? state.sentences : state.keywords;
   if (state.index < items.length - 1) {
