@@ -3,183 +3,775 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Ghanaian Clean Speech - Recorder</title>
+<title>Ghanaian Clean Speech - Recording Portal</title>
+<script src="https://accounts.google.com/gsi/client"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
   :root {
-    --bg:#F7F5F0;--surface:#FFFFFF;--surface2:#F0EDE6;
-    --accent:#1A6B4A;--accent-light:#E1F5EE;--accent-mid:#0F6E56;
-    --text:#1C1C1A;--text2:#5F5E5A;--text3:#888780;
-    --border:rgba(0,0,0,0.10);--border2:rgba(0,0,0,0.16);
-    --red:#D85A30;--red-light:#FAECE7;--amber:#BA7517;--amber-light:#FAEEDA;
-    --radius:14px;--radius-sm:8px;
+    --bg: #f6f3ec;
+    --surface: #ffffff;
+    --surface-soft: #f1ede5;
+    --surface-tint: #e8f4ee;
+    --text: #181815;
+    --muted: #64625d;
+    --line: rgba(24, 24, 21, 0.12);
+    --line-strong: rgba(24, 24, 21, 0.2);
+    --green: #166245;
+    --green-strong: #0e5238;
+    --green-soft: #dff2e9;
+    --amber: #9a650f;
+    --amber-soft: #fbefda;
+    --red: #bf4f2b;
+    --red-soft: #f8e7e0;
+    --blue-soft: #e7eefc;
+    --radius: 18px;
+    --radius-sm: 12px;
+    --shadow: 0 10px 30px rgba(20, 20, 20, 0.06);
   }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 16px 60px;}
-  header{width:100%;max-width:640px;padding:28px 0 20px;display:flex;align-items:center;gap:12px;}
-  .logo{width:38px;height:38px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-  .logo svg{width:20px;height:20px;}
-  .brand{line-height:1.2;}
-  .brand h1{font-size:15px;font-weight:600;letter-spacing:-0.2px;}
-  .brand p{font-size:12px;color:var(--text3);}
-  .main{width:100%;max-width:640px;}
-  .card{background:var(--surface);border-radius:var(--radius);border:0.5px solid var(--border);padding:24px;margin-bottom:16px;}
-  .card-label{font-size:11px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin-bottom:14px;}
-  .field{margin-bottom:14px;}
-  .field:last-child{margin-bottom:0;}
-  .field label{font-size:13px;color:var(--text2);display:block;margin-bottom:6px;}
-  input,select{width:100%;padding:10px 14px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);font-family:inherit;font-size:15px;background:var(--surface);color:var(--text);outline:none;transition:border-color 0.15s;}
-  input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,107,74,0.12);}
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 22px;border-radius:var(--radius-sm);font-family:inherit;font-size:15px;font-weight:500;cursor:pointer;border:none;transition:all 0.15s;white-space:nowrap;}
-  .btn-primary{background:var(--accent);color:white;}
-  .btn-primary:hover{background:var(--accent-mid);}
-  .btn-primary:disabled{opacity:0.4;cursor:not-allowed;}
-  .btn-ghost{background:transparent;color:var(--text2);border:0.5px solid var(--border2);}
-  .btn-ghost:hover{background:var(--surface2);}
-  .btn-ghost:disabled{opacity:0.4;cursor:not-allowed;}
-  .btn-danger{background:var(--red-light);color:var(--red);}
-  .btn-danger:hover{background:#f5c4b3;}
-  .screen{display:none;}
-  .screen.active{display:block;}
-  .progress-wrap{background:var(--surface2);border-radius:99px;height:6px;overflow:hidden;margin-bottom:6px;}
-  .progress-fill{height:100%;background:var(--accent);border-radius:99px;transition:width 0.4s ease;}
-  .progress-label{font-size:12px;color:var(--text3);display:flex;justify-content:space-between;}
-  .phase-tabs{display:flex;gap:8px;margin-bottom:20px;}
-  .phase-tab{flex:1;padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;text-align:center;border:0.5px solid var(--border2);background:var(--surface2);color:var(--text3);}
-  .phase-tab.active{background:var(--accent-light);color:var(--accent);border-color:var(--accent);}
-  .prompt-box{background:var(--surface2);border-radius:var(--radius-sm);padding:20px;margin:16px 0;min-height:80px;display:flex;align-items:center;justify-content:center;}
-  .prompt-text{font-size:20px;font-weight:500;text-align:center;line-height:1.5;letter-spacing:-0.3px;}
-  .prompt-keyword{font-family:"DM Mono",monospace;font-size:28px;font-weight:500;color:var(--accent);text-align:center;}
-  .prompt-hint{font-size:12px;color:var(--text3);text-align:center;margin-top:8px;}
-  .record-zone{display:flex;flex-direction:column;align-items:center;gap:16px;padding:20px 0 8px;}
-  .record-btn{width:80px;height:80px;border-radius:50%;border:none;cursor:pointer;background:var(--accent);display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
-  .record-btn:hover{transform:scale(1.05);}
-  .record-btn.recording{background:var(--red);animation:pulse 1.2s ease-in-out infinite;}
-  .record-btn.has-audio{background:var(--accent-mid);}
-  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(216,90,48,0.3);}50%{box-shadow:0 0 0 14px rgba(216,90,48,0);}}
-  .record-btn svg{width:30px;height:30px;}
-  .rec-status{font-size:13px;color:var(--text3);min-height:18px;text-align:center;}
-  .rec-status.recording{color:var(--red);font-weight:500;}
-  .rec-status.done{color:var(--accent);font-weight:500;}
-  .waveform-wrap{width:100%;height:48px;background:var(--surface2);border-radius:var(--radius-sm);overflow:hidden;}
-  canvas#waveCanvas{width:100%;height:48px;display:block;}
-  .action-row{display:flex;gap:10px;margin-top:12px;}
-  .action-row .btn{flex:1;}
-  .file-badge{font-family:"DM Mono",monospace;font-size:12px;background:var(--surface2);border-radius:6px;padding:6px 10px;color:var(--text2);text-align:center;margin-bottom:12px;}
-  .upload-status{font-size:13px;padding:10px 14px;border-radius:var(--radius-sm);margin-top:10px;display:none;}
-  .upload-status.uploading{background:var(--amber-light);color:var(--amber);display:block;}
-  .upload-status.success{background:var(--accent-light);color:var(--accent);display:block;}
-  .upload-status.error{background:var(--red-light);color:var(--red);display:block;}
-  .nav-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px;}
-  .item-counter{font-size:13px;color:var(--text3);}
-  #scriptStatus{font-size:13px;padding:10px 14px;border-radius:8px;display:none;margin-top:8px;}
-  .done-screen{text-align:center;padding:32px 0;}
-  .done-screen h2{font-size:24px;font-weight:600;margin-bottom:8px;}
-  .done-screen p{color:var(--text2);font-size:15px;line-height:1.6;}
-  .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0;}
-  .stat-card{background:var(--surface2);border-radius:var(--radius-sm);padding:14px;text-align:center;}
-  .stat-card .val{font-size:22px;font-weight:600;color:var(--accent);}
-  .stat-card .lbl{font-size:12px;color:var(--text3);margin-top:2px;}
-  @media(max-width:480px){.card{padding:18px;}.prompt-text{font-size:17px;}.prompt-keyword{font-size:24px;}.record-btn{width:70px;height:70px;}}
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: linear-gradient(180deg, #faf8f2 0%, #f4f1ea 100%);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 16px 60px;
+  }
+
+  .shell {
+    width: 100%;
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  header {
+    padding: 28px 0 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    background: var(--green);
+    display: grid;
+    place-items: center;
+    box-shadow: var(--shadow);
+    flex: 0 0 auto;
+  }
+
+  .logo svg { width: 24px; height: 24px; }
+
+  .brand h1 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .brand p {
+    margin: 3px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.75);
+    border: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 13px;
+    backdrop-filter: blur(8px);
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .grid {
+    display: grid;
+    gap: 16px;
+  }
+
+  .grid.two {
+    grid-template-columns: 1.2fr 0.8fr;
+  }
+
+  .card {
+    background: rgba(255,255,255,0.88);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 22px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(8px);
+  }
+
+  .section-label {
+    margin: 0 0 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 11px;
+    font-weight: 700;
+    color: #8d8a83;
+  }
+
+  .title-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: start;
+    margin-bottom: 14px;
+  }
+
+  .title-row h2 {
+    margin: 0;
+    font-size: 22px;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+  }
+
+  .subtle {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .field {
+    margin-bottom: 14px;
+  }
+
+  .field:last-child {
+    margin-bottom: 0;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    border: 1px solid var(--line-strong);
+    background: #fff;
+    color: var(--text);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font: inherit;
+    outline: none;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 4px rgba(22, 98, 69, 0.12);
+  }
+
+  .helper {
+    margin-top: 7px;
+    color: #8d8a83;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .checklist {
+    display: grid;
+    gap: 10px;
+    margin-top: 6px;
+  }
+
+  .check {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    background: var(--surface-soft);
+    border-radius: 14px;
+    padding: 12px 13px;
+    font-size: 14px;
+    line-height: 1.45;
+    color: #2d2c29;
+  }
+
+  .check .dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--green);
+    margin-top: 6px;
+    flex: 0 0 auto;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  button {
+    border: none;
+    cursor: pointer;
+    font: inherit;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 46px;
+    padding: 12px 18px;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: transform 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+  }
+
+  .btn:hover { transform: translateY(-1px); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+  .btn-primary {
+    background: var(--green);
+    color: #fff;
+  }
+
+  .btn-primary:hover { background: var(--green-strong); }
+
+  .btn-secondary {
+    background: #fff;
+    color: var(--text);
+    border: 1px solid var(--line-strong);
+  }
+
+  .btn-secondary:hover { background: #f9f8f5; }
+
+  .btn-danger {
+    background: var(--red-soft);
+    color: var(--red);
+  }
+
+  .btn-danger:hover { background: #f4d4c8; }
+
+  .btn-full { width: 100%; }
+
+  .notice {
+    border-radius: 14px;
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.45;
+    margin-top: 12px;
+    display: none;
+  }
+
+  .notice.show { display: block; }
+  .notice.warn { background: var(--amber-soft); color: var(--amber); }
+  .notice.good { background: var(--green-soft); color: var(--green); }
+  .notice.bad { background: var(--red-soft); color: var(--red); }
+  .notice.info { background: var(--blue-soft); color: #3458a4; }
+
+  .hero {
+    display: grid;
+    gap: 16px;
+  }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  .meta {
+    background: var(--surface-soft);
+    border-radius: 14px;
+    padding: 14px 12px;
+  }
+
+  .meta .label {
+    color: #8d8a83;
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .meta .value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--green);
+    letter-spacing: -0.03em;
+  }
+
+  .session-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+    padding: 8px 12px;
+    background: var(--surface-soft);
+    border-radius: 999px;
+  }
+
+  .phase-tabs {
+    display: flex;
+    gap: 10px;
+  }
+
+  .phase-tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: var(--surface-soft);
+    color: #7d7a74;
+    font-size: 13px;
+    font-weight: 700;
+    border: 1px solid transparent;
+  }
+
+  .phase-tab.active {
+    background: var(--surface-tint);
+    color: var(--green);
+    border-color: rgba(22, 98, 69, 0.24);
+  }
+
+  .progress-block {
+    display: grid;
+    gap: 8px;
+  }
+
+  .progress-track {
+    width: 100%;
+    height: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #e6e0d7;
+  }
+
+  .progress-fill {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--green) 0%, #29a16e 100%);
+    border-radius: inherit;
+    transition: width 0.22s ease;
+  }
+
+  .progress-labels {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .filename {
+    font-family: 'DM Mono', monospace;
+    background: var(--surface-soft);
+    color: #4b4944;
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+  }
+
+  .prompt-box {
+    background: linear-gradient(180deg, #f7f3eb 0%, #f1ece3 100%);
+    border-radius: 18px;
+    padding: 24px 18px;
+    min-height: 160px;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    border: 1px solid rgba(0,0,0,0.05);
+  }
+
+  .prompt-text {
+    margin: 0;
+    font-size: 24px;
+    line-height: 1.5;
+    letter-spacing: -0.03em;
+  }
+
+  .prompt-text.keyword {
+    font-family: 'DM Mono', monospace;
+    font-size: 30px;
+    color: var(--green);
+  }
+
+  .prompt-hint {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .recorder-center {
+    display: grid;
+    justify-items: center;
+    gap: 14px;
+    padding: 8px 0 2px;
+  }
+
+  .record-btn {
+    width: 92px;
+    height: 92px;
+    border-radius: 50%;
+    background: var(--green);
+    display: grid;
+    place-items: center;
+    box-shadow: 0 14px 28px rgba(22, 98, 69, 0.2);
+  }
+
+  .record-btn svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .record-btn.recording {
+    background: var(--red);
+    animation: pulse 1.2s infinite;
+  }
+
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(191,79,43,0.28); }
+    70% { box-shadow: 0 0 0 16px rgba(191,79,43,0); }
+    100% { box-shadow: 0 0 0 0 rgba(191,79,43,0); }
+  }
+
+  .status {
+    min-height: 20px;
+    font-size: 14px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .status.recording { color: var(--red); font-weight: 700; }
+  .status.ready { color: var(--green); font-weight: 700; }
+
+  .meter {
+    width: 100%;
+    height: 58px;
+    border-radius: 14px;
+    background: var(--surface-soft);
+    overflow: hidden;
+  }
+
+  canvas {
+    width: 100%;
+    height: 58px;
+    display: block;
+  }
+
+  .audio-panel {
+    display: grid;
+    gap: 10px;
+  }
+
+  audio {
+    width: 100%;
+  }
+
+  .small-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .tiny {
+    font-size: 12px;
+    color: #8d8a83;
+  }
+
+  .footer-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  .footer-actions .btn {
+    flex: 1;
+  }
+
+  .summary-list {
+    display: grid;
+    gap: 10px;
+    margin: 14px 0 0;
+  }
+
+  .summary-item {
+    background: var(--surface-soft);
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    font-size: 14px;
+  }
+
+  .summary-item strong {
+    font-size: 16px;
+    color: var(--green);
+  }
+
+  .done-icon {
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 16px;
+    background: var(--green-soft);
+  }
+
+  .done-icon svg { width: 28px; height: 28px; }
+
+  .center {
+    text-align: center;
+  }
+
+  .muted-list {
+    margin: 10px 0 0;
+    padding-left: 18px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  @media (max-width: 760px) {
+    .grid.two {
+      grid-template-columns: 1fr;
+    }
+
+    .meta-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .prompt-text {
+      font-size: 20px;
+    }
+
+    .prompt-text.keyword {
+      font-size: 25px;
+    }
+
+    header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .pill {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+.spinner{width:36px;height:36px;border:3px solid var(--green-soft);border-top-color:var(--green);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px;}
+@keyframes spin{to{transform:rotate(360deg);}}
 </style>
 </head>
 <body>
-<header>
-  <div class="logo">
-    <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="4" fill="white"/><path d="M10 2v3M10 15v3M2 10h3M15 10h3" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>
-  </div>
-  <div class="brand"><h1>Ghanaian Clean Speech</h1><p>Recording Portal</p></div>
-</header>
-<div class="main">
-
-  <!-- SETUP -->
-  <div id="screen-setup" class="screen active">
-    <div class="card">
-      <div class="card-label">Participant Info</div>
-      <div class="field">
-        <label>Participant ID</label>
-        <input type="text" id="participantId" placeholder="e.g. P012" maxlength="8"/>
+<div class="shell">
+  <header>
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="4.5" fill="white"/>
+          <path d="M12 2.75v3.25M12 18v3.25M2.75 12H6M18 12h3.25M5.7 5.7l2.3 2.3M16 16l2.3 2.3M18.3 5.7L16 8M8 16l-2.3 2.3" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
       </div>
-      <div class="field">
-        <label>Language</label>
-        <select id="language">
-          <option value="">-- select language --</option>
-          <option value="EN">English (EN)</option>
-          <option value="TWI">Twi (TWI)</option>
-          <option value="GA">Ga (GA)</option>
-          <option value="EWE">Ewe (EWE)</option>
-          <option value="HAU">Hausa (HAU)</option>
-          <option value="DAG">Dagaare (DAG)</option>
-        </select>
-        <div id="scriptStatus"></div>
-      </div>
-      <div style="margin-top:18px">
-        <button class="btn btn-primary" id="startBtn" style="width:100%">Begin Recording Session</button>
+      <div>
+        <h1>Ghanaian Clean Speech</h1>
+        <p>Participant recording portal</p>
       </div>
     </div>
-  </div>
+    <div class="pill" id="statusPill">Ready</div>
+  </header>
 
-  <!-- RECORDING -->
-  <div id="screen-record" class="screen">
-    <div class="card" style="margin-bottom:12px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-        <div>
-          <div style="font-size:13px;color:var(--text3)" id="sessionLabel">P012 - EN</div>
-          <div style="font-size:15px;font-weight:500;margin-top:2px" id="phaseTitle">Sentences</div>
+  <!-- SETUP SCREEN -->
+  <section id="screen-setup" class="screen active">
+    <div class="grid two">
+      <div class="card hero">
+        <div class="title-row">
+          <div>
+            <p class="section-label">Start session</p>
+            <h2>Record sentences and keywords</h2>
+          </div>
         </div>
-        <div class="item-counter" id="counterLabel">1 / 150</div>
+        <p class="subtle">Enter your Participant ID and select your assigned language, then sign in with Google to begin. Your recordings will be saved to your Google Drive.</p>
+
+        <div class="field">
+          <label for="participantId">Participant ID</label>
+          <input id="participantId" type="text" maxlength="16" placeholder="e.g. P012"/>
+          <div class="helper">Provided by the coordinator. Letters and numbers only.</div>
+        </div>
+
+        <div class="field">
+          <label for="language">Language</label>
+          <select id="language">
+            <option value="">Select language</option>
+            <option value="EN">English (EN)</option>
+            <option value="TWI">Twi (TWI)</option>
+            <option value="GA">Ga (GA)</option>
+            <option value="EWE">Ewe (EWE)</option>
+            <option value="HAU">Hausa (HAU)</option>
+            <option value="DAG">Dagaare (DAG)</option>
+          </select>
+          <div class="helper" id="scriptInfo">Each language includes 150 sentences and 150 keywords.</div>
+        </div>
+
+        <div class="btn-row" style="margin-top:8px;">
+          <button class="btn btn-primary" id="beginBtn">Sign in with Google &amp; Begin</button>
+        </div>
+
+        <div id="setupNotice" class="notice"></div>
       </div>
-      <div class="phase-tabs">
-        <div class="phase-tab active" id="tab-sentences">Sentences</div>
-        <div class="phase-tab" id="tab-keywords">Keywords</div>
-      </div>
-      <div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-      <div class="progress-label"><span id="progressLabel">0 / 300 total</span><span id="progressPct">0%</span></div>
-    </div>
-    <div class="card">
-      <div class="file-badge" id="fileBadge">P012_EN_S001_T1.wav</div>
-      <div class="prompt-box">
-        <div style="width:100%">
-          <div class="prompt-text" id="promptText">Loading...</div>
-          <div class="prompt-hint" id="promptHint"></div>
+
+      <div class="card">
+        <p class="section-label">Before recording</p>
+        <div class="checklist">
+          <div class="check"><span class="dot"></span><span>Find a quiet room with no background noise or fans.</span></div>
+          <div class="check"><span class="dot"></span><span>Hold the phone 15-20 cm from your mouth.</span></div>
+          <div class="check"><span class="dot"></span><span>Read exactly what appears on screen at a natural pace.</span></div>
+          <div class="check"><span class="dot"></span><span>For keywords, say the word twice with a short pause between.</span></div>
+          <div class="check"><span class="dot"></span><span>Use Retake if you cough, hesitate, or misread.</span></div>
         </div>
       </div>
-      <div class="record-zone">
-        <div class="waveform-wrap"><canvas id="waveCanvas"></canvas></div>
-        <button class="record-btn" id="recordBtn">
-          <svg id="recIcon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="6" fill="white"/></svg>
-        </button>
-        <div class="rec-status" id="recStatus">Tap to start recording</div>
-      </div>
-      <div id="uploadStatus" class="upload-status"></div>
-      <div class="action-row">
-        <button class="btn btn-danger" id="retakeBtn" disabled>Retake</button>
-        <button class="btn btn-ghost" id="playBtn" disabled>Play back</button>
-      </div>
-      <div class="nav-row">
-        <button class="btn btn-ghost" id="prevBtn">Previous</button>
-        <button class="btn btn-primary" id="nextBtn" disabled>Save &amp; Next</button>
-      </div>
     </div>
-  </div>
+  </section>
 
-  <!-- DONE -->
-  <div id="screen-done" class="screen">
-    <div class="card done-screen">
-      <div style="width:52px;height:52px;background:var(--accent-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#1A6B4A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-      <h2>All recordings done!</h2>
-      <p>All files have been uploaded successfully.<br/>You may close this tab.</p>
-      <div class="stats-grid">
-        <div class="stat-card"><div class="val">150</div><div class="lbl">Sentences</div></div>
-        <div class="stat-card"><div class="val">150</div><div class="lbl">Keywords</div></div>
-        <div class="stat-card"><div class="val" id="doneParticipant">P012</div><div class="lbl">Participant</div></div>
-        <div class="stat-card"><div class="val" id="doneLang">EN</div><div class="lbl">Language</div></div>
-      </div>
-      <button class="btn btn-ghost" id="resetBtn" style="width:100%;margin-top:8px">Start new session</button>
+  <!-- SIGNING IN SCREEN -->
+  <section id="screen-signing" class="screen">
+    <div class="card" style="text-align:center;padding:48px 24px;">
+      <div class="spinner"></div>
+      <h2 style="margin:0 0 8px;">Connecting to Google Drive</h2>
+      <p class="subtle">You will be redirected to sign in. Please wait...</p>
     </div>
-  </div>
+  </section>
+
+  <!-- RECORDING SCREEN -->
+  <section id="screen-record" class="screen">
+    <div class="grid" style="gap:14px;">
+      <div class="card">
+        <div class="title-row">
+          <div>
+            <p class="section-label">Session</p>
+            <h2 id="sessionTitle">P012 &middot; EN</h2>
+          </div>
+          <div class="session-chip" id="sessionChip">Sentence 1 of 150</div>
+        </div>
+
+        <div class="meta-grid">
+          <div class="meta"><div class="label">Total done</div><div class="value" id="metaDone">0</div></div>
+          <div class="meta"><div class="label">Uploaded</div><div class="value" id="metaUploaded">0</div></div>
+          <div class="meta"><div class="label">Phase</div><div class="value" id="metaPhase">S</div></div>
+          <div class="meta"><div class="label">Take</div><div class="value" id="metaTake">1</div></div>
+        </div>
+
+        <div class="phase-tabs" style="margin-top:16px;">
+          <div class="phase-tab active" id="tabSentences">Sentences</div>
+          <div class="phase-tab" id="tabKeywords">Keywords</div>
+        </div>
+
+        <div class="progress-block" style="margin-top:16px;">
+          <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+          <div class="progress-labels">
+            <span id="progressText">0 / 300 complete</span>
+            <span id="progressPct">0%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid two">
+        <div class="card">
+          <p class="section-label">Current prompt</p>
+          <div class="filename" id="fileBadge">P012_EN_S001_T1.wav</div>
+          <div class="prompt-box" style="margin-top:14px;">
+            <div>
+              <p class="prompt-text" id="promptText">Loading...</p>
+              <div class="prompt-hint" id="promptHint"></div>
+            </div>
+          </div>
+
+          <div class="recorder-center">
+            <div class="meter"><canvas id="waveCanvas" width="700" height="58"></canvas></div>
+            <button class="record-btn" id="recordBtn">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="6" fill="white"/></svg>
+            </button>
+            <div class="status" id="recStatus">Tap to start recording</div>
+          </div>
+
+          <div class="audio-panel" style="margin-top:16px;">
+            <div class="small-grid">
+              <button class="btn btn-danger" id="retakeBtn" disabled>Retake</button>
+              <button class="btn btn-secondary" id="playBtn" disabled>Play back</button>
+            </div>
+          </div>
+
+          <div id="uploadNotice" class="notice" style="margin-top:10px;"></div>
+
+          <div class="footer-actions" style="margin-top:12px;">
+            <button class="btn btn-secondary" id="prevBtn">Previous</button>
+            <button class="btn btn-primary" id="nextBtn" disabled>Save &amp; Next</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <p class="section-label">Upload status</p>
+          <div class="summary-list">
+            <div class="summary-item"><span>Phase</span><strong id="phaseSummary">Sentences</strong></div>
+            <div class="summary-item"><span>Current item</span><strong id="itemSummary">1 / 150</strong></div>
+            <div class="summary-item"><span>Last upload</span><strong id="lastUpload">None yet</strong></div>
+          </div>
+          <div class="btn-row" style="margin-top:16px;">
+            <button class="btn btn-secondary btn-full" id="restartBtn">Start new participant</button>
+          </div>
+          <ul class="muted-list" style="margin-top:14px;">
+            <li>Files are uploaded to your Google Drive after each recording.</li>
+            <li>Folder: <strong id="folderLabel">ParticipantID_LANG</strong></li>
+            <li>Subfolders: Sentences / Keywords</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DONE SCREEN -->
+  <section id="screen-done" class="screen">
+    <div class="card center">
+      <div class="done-icon">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#166245" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <p class="section-label">Session complete</p>
+      <h2 style="margin:0 0 8px;font-size:28px;letter-spacing:-0.03em;">Recording finished!</h2>
+      <p class="subtle">All 300 recordings are done and uploaded to Google Drive.</p>
+      <div class="summary-list" style="margin-top:20px;text-align:left;">
+        <div class="summary-item"><span>Participant</span><strong id="doneParticipant">-</strong></div>
+        <div class="summary-item"><span>Language</span><strong id="doneLang">-</strong></div>
+        <div class="summary-item"><span>Sentences</span><strong>150</strong></div>
+        <div class="summary-item"><span>Keywords</span><strong>150</strong></div>
+      </div>
+      <div class="btn-row" style="margin-top:18px;">
+        <button class="btn btn-secondary" id="resetBtn">New session</button>
+      </div>
+    </div>
+  </section>
 
 </div>
 <script>
@@ -2022,124 +2614,151 @@ const SCRIPTS = {
   },
 };
 
-// ── Service account config ─────────────────────────────────────────────────
-var SA_EMAIL     = "speech-uploader@ghanaian-clean-speech.iam.gserviceaccount.com";
-var SA_KEY       = "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDWfbgJ0qokAHTk\nkqltJe0ZotgicxhCrNAIZQXr9SoFS24Fqy2gTPKK05XF053Ftqhm6yuvjXJDx1zN\nBDA4OoYW31KFoqq7v0aZ7U7D2XN/vFDEmR0ZtODion8POKkR+QuLQLWEstd/k+Qw\nEzz6EKZr6yAo4Pk9QFvfxnwhWXs2+XYW99BAypHmvD8hkxkqiTT7YZoJeVy3e3a2\nyM9SFPF52zE7SzCHr/+lKzA0K7BLrIZUIcW9zoiGycJ5PYhGXjL6irtYKpSszgmC\nHXldd/+H9WxOF6o533+/BPUPDoSAiR6xzrTHBWvoN87foK8sF7la1+fu2Cwcse0g\nl8t0bCihAgMBAAECggEAId41jGWFhIxG6N2on4m0y869Eol6a/LGIYE0I2sxkKb1\nrzL1kCF+TcH1nQhaWgEKy794BS8QOxgUdPHjnElPaXanXN8P1vfvsbf5Ly8bj/Cg\nDz7/C5NWTCrs5a4kcihRNJKJ5vNnWCd1yUqMXw74fENi71mAuXV7XFUGvixXKpmE\nuX4YOY8k9q0ggOAoj1ZJxuIQbTi2VrVoNIcVQKqj9CtbH2ZQMx/Kfx/eBy4LnREF\npz8J1tFtNBJPL7gIQbJQJCuqMzxSdXdaqyYzpoA0SN1Y44VzmYipqNyN8AobnMtr\nqjnyM4bR+iuVrzyYAEEqELHpNUPPDxDoiq2mJJ9cDQKBgQD3f7uUYQI3TuIotwcJ\nZyUoTzB/xXjUe3LPLJkI2KQ+wwy6PWzePnTVcqb7TrkSBH1v5J12WNgh/PrhDRfz\neXznjpsOguRjYICg23Y3OLP1FjxHW4jMKRFXSGMuLCf3zDuA+EBnoLqOej0hmPBG\n81YpBPdNMnhNusNC6xPxaYbelQKBgQDd278ugWCsoWLnzXp+Hyl3SPnSrxdurOjP\n3XlVnHqPQZTsDD/QNnFFZj3lZeNbTVJopCF/EBQEpe96wDinvPceMzjMkaBSihj4\n5RJeW+lVS4R+m/PdkKdKA63lxR7ZxGBOmfGKpNkJc7Ri1IByGJq3a2gX48Ble4TU\nu3tIxX963QKBgF8gLBOimXxyiEBH4J9/kmuEzEo/tupMLFtuc79PrQkmZKzsUPy2\nmqczcvSiVEWVjjTEdLT4/tFJb4+yPaNp7VT+naAdNPTxMV8iGrSsyZYIntB6YQC/\nRBf9DYnAlPgL+k7em7p4r1t1pitUof1TJ6mKbBaysESH5ObCfZ7LBXhlAoGAc5o+\na1gk7K8HX2vVSQSp0asn6d0sY5Ibmbx4reBkiGMO21Sip7bGnPfihrbpmjiXGUl0\n3sWc+LMSLy8cFmNDjOv5y7aSCJBG5OJQCPTxh21bM7HFh40JbmquYUyuf6Bw4mQa\n1TiCkwdEVj8OUuV5MNv5mIEnTnnnRAYQ/mFSxM0CgYAUlE3198woclCPKPOxMqzn\nCcOh8JGMFRDgr4OlchTb585IUdSruHa+1Cjt65UgOZ2ntrMltqmWJ/P0pOfeGRro\n9ehZhEdZZKkYkxTTrp3ZyCQBboNwV4az4kOGTIjIg6TTpqnGa3R26Xxy00IBihy8\nY4omipPgBYmfSlwH44Fnmw==\n-----END PRIVATE KEY-----\n";
-var FOLDER_ID    = "1WfwM9sc6mfXHeSKs3rXmRYiAMPYG_g97";
-var TOKEN_URI    = "https://oauth2.googleapis.com/token";
-var DRIVE_SCOPE  = "https://www.googleapis.com/auth/drive.file";
 
-// ── App state ──────────────────────────────────────────────────────────────
+var CLIENT_ID = "584738927714-av23beulsdtqftl7oo2g6c7mabnqpeho.apps.googleusercontent.com";
+var SCOPE     = "https://www.googleapis.com/auth/drive.file";
+
 var state = {
   participantId:"", language:"",
   sentences:[], keywords:[],
   phase:"sentences", index:0, take:1,
   mediaRecorder:null, audioChunks:[], audioBlob:null, audioUrl:null,
   isRecording:false, accessToken:null, tokenExpiry:0,
-  sampleRate:44100, analyser:null, animFrame:null, stream:null
+  sampleRate:44100, analyser:null, animFrame:null, stream:null,
+  uploaded:0
 };
 var folderCache = {};
 
-// ── JWT / Service Account auth ─────────────────────────────────────────────
+// ── OAuth ──────────────────────────────────────────────────────────────────
 
-function b64url(str) {
-  return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-
-function b64urlUint8(buf) {
-  var binary = "";
-  var bytes = new Uint8Array(buf);
-  for (var i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-
-async function getAccessToken() {
-  // Return cached token if still valid (with 60s buffer)
-  if (state.accessToken && Date.now() < state.tokenExpiry - 60000) return state.accessToken;
-
-  var now = Math.floor(Date.now() / 1000);
-  var header  = b64url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
-  var payload = b64url(JSON.stringify({
-    iss: SA_EMAIL, scope: DRIVE_SCOPE, aud: TOKEN_URI, iat: now, exp: now + 3600
-  }));
-  var sigInput = header + "." + payload;
-
-  // Import the private key for RS256 signing
-  var pemContents = SA_KEY
-    .replace("-----BEGIN PRIVATE KEY-----", "")
-    .replace("-----END PRIVATE KEY-----", "")
-    .replace(/\n/g, "")
-    .replace(/\s/g, "");
-  var binaryDer = Uint8Array.from(atob(pemContents), function(c) { return c.charCodeAt(0); });
-
-  var cryptoKey = await crypto.subtle.importKey(
-    "pkcs8", binaryDer.buffer,
-    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
-    false, ["sign"]
-  );
-
-  var encoder = new TextEncoder();
-  var sigBuf  = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", cryptoKey, encoder.encode(sigInput));
-  var jwt     = sigInput + "." + b64urlUint8(sigBuf);
-
-  // Exchange JWT for access token
-  var resp = await fetch(TOKEN_URI, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: "grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=" + jwt
+function parseTokenFromHash() {
+  var hash = window.location.hash.substring(1);
+  if (!hash) return null;
+  var params = {};
+  hash.split("&").forEach(function(part) {
+    var kv = part.split("=");
+    if (kv.length >= 2) params[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]);
   });
-  var data = await resp.json();
-  if (!data.access_token) throw new Error("Token error: " + JSON.stringify(data));
-  state.accessToken = data.access_token;
-  state.tokenExpiry = Date.now() + (data.expires_in * 1000);
-  return state.accessToken;
+  return params["access_token"] || null;
 }
 
-// ── Setup screen ───────────────────────────────────────────────────────────
-
-function onLangChange() {
-  var lang = document.getElementById("language").value;
-  var el   = document.getElementById("scriptStatus");
-  if (!lang) { el.style.display = "none"; return; }
-  if (SCRIPTS[lang]) {
-    el.style.display = "block";
-    el.style.background = "var(--accent-light)";
-    el.style.color = "var(--accent)";
-    el.textContent = "Script ready: 150 sentences and 150 keywords for " + lang + ".";
-  } else {
-    el.style.display = "block";
-    el.style.background = "var(--amber-light)";
-    el.style.color = "var(--amber)";
-    el.textContent = "Script for " + lang + " not yet available. Contact the coordinator.";
+function boot() {
+  var hashToken = parseTokenFromHash();
+  if (hashToken) {
+    sessionStorage.setItem("cs_token", hashToken);
+    history.replaceState(null, "", window.location.pathname);
   }
+  var token    = hashToken || sessionStorage.getItem("cs_token");
+  var pid      = sessionStorage.getItem("cs_pid");
+  var lang     = sessionStorage.getItem("cs_lang");
+  var phase    = sessionStorage.getItem("cs_phase") || "sentences";
+  var index    = parseInt(sessionStorage.getItem("cs_index") || "0", 10);
+  var uploaded = parseInt(sessionStorage.getItem("cs_uploaded") || "0", 10);
+
+  if (token && pid && lang && SCRIPTS[lang]) {
+    state.accessToken   = token;
+    state.participantId = pid;
+    state.language      = lang;
+    state.sentences     = SCRIPTS[lang].sentences;
+    state.keywords      = SCRIPTS[lang].keywords;
+    state.phase         = phase;
+    state.index         = index;
+    state.uploaded      = uploaded;
+    state.take          = 1;
+    showScreen("record");
+    renderItem();
+    return;
+  }
+  showScreen("setup");
 }
 
-function startSession() {
-  var pid  = document.getElementById("participantId").value.trim().toUpperCase();
-  var lang = document.getElementById("language").value;
-  if (!pid)  { alert("Please enter your Participant ID."); return; }
-  if (!lang) { alert("Please select a language."); return; }
-  if (!SCRIPTS[lang]) { alert("Script for " + lang + " not yet available. Contact the coordinator."); return; }
-  state.participantId = pid;
-  state.language      = lang;
-  state.sentences     = SCRIPTS[lang].sentences;
-  state.keywords      = SCRIPTS[lang].keywords;
-  state.phase         = "sentences";
-  state.index         = 0;
-  state.take          = 1;
-  folderCache         = {};
-  showScreen("record");
-  renderItem();
+function doGoogleSignIn(pid, lang) {
+  sessionStorage.setItem("cs_pid",      pid);
+  sessionStorage.setItem("cs_lang",     lang);
+  sessionStorage.setItem("cs_phase",    "sentences");
+  sessionStorage.setItem("cs_index",    "0");
+  sessionStorage.setItem("cs_uploaded", "0");
+  showScreen("signing");
+  setTimeout(function() {
+    var client = google.accounts.oauth2.initTokenClient({
+      client_id:    CLIENT_ID,
+      scope:        SCOPE,
+      ux_mode:      "redirect",
+      redirect_uri: window.location.href.split("?")[0].split("#")[0],
+      callback:     function(resp) {
+        if (resp && resp.access_token) {
+          state.accessToken = resp.access_token;
+          sessionStorage.setItem("cs_token", resp.access_token);
+          showScreen("record");
+          renderItem();
+        }
+      },
+      error_callback: function(err) {
+        showNotice("bad", "Google sign-in failed. Please try again.");
+        showScreen("setup");
+      }
+    });
+    client.requestAccessToken({ prompt: "consent" });
+  }, 300);
 }
 
-// ── Screen helper ──────────────────────────────────────────────────────────
+// ── UI helpers ─────────────────────────────────────────────────────────────
 
 function showScreen(name) {
-  document.querySelectorAll(".screen").forEach(function(s) { s.classList.remove("active"); });
+  ["setup","signing","record","done"].forEach(function(s) {
+    document.getElementById("screen-" + s).classList.remove("active");
+  });
   document.getElementById("screen-" + name).classList.add("active");
 }
 
+function showNotice(type, msg) {
+  var el = document.getElementById("uploadNotice");
+  el.className = "notice show " + type;
+  el.textContent = msg;
+}
+
+function clearNotice() {
+  var el = document.getElementById("uploadNotice");
+  el.className = "notice";
+  el.textContent = "";
+}
+
+function setStatus(text) {
+  document.getElementById("statusPill").textContent = text;
+}
+
+function onLangChange() {
+  var lang = document.getElementById("language").value;
+  var info = document.getElementById("scriptInfo");
+  if (!lang) { info.textContent = "Each language includes 150 sentences and 150 keywords."; return; }
+  if (SCRIPTS[lang]) {
+    info.textContent = "Script ready: 150 sentences and 150 keywords for " + lang + ".";
+  } else {
+    info.textContent = "Script for " + lang + " not yet available. Contact the coordinator.";
+  }
+}
+
+// ── Setup ──────────────────────────────────────────────────────────────────
+
+function beginSession() {
+  var pid  = document.getElementById("participantId").value.trim().toUpperCase().replace(/[^A-Z0-9_-]/g, "");
+  var lang = document.getElementById("language").value;
+  var notice = document.getElementById("setupNotice");
+  notice.className = "notice"; notice.textContent = "";
+  if (!pid)  { notice.className="notice show bad"; notice.textContent="Please enter your Participant ID."; return; }
+  if (!lang) { notice.className="notice show bad"; notice.textContent="Please select a language."; return; }
+  if (!SCRIPTS[lang]) { notice.className="notice show bad"; notice.textContent="Script for " + lang + " not yet available."; return; }
+  if (typeof google === "undefined" || !google.accounts) { notice.className="notice show bad"; notice.textContent="Google sign-in is still loading. Please wait a moment and try again."; return; }
+  doGoogleSignIn(pid, lang);
+}
+
 // ── Recording ──────────────────────────────────────────────────────────────
+
+function saveProgress() {
+  sessionStorage.setItem("cs_phase",    state.phase);
+  sessionStorage.setItem("cs_index",    String(state.index));
+  sessionStorage.setItem("cs_uploaded", String(state.uploaded));
+}
 
 function getFileName() {
   var type = state.phase === "sentences" ? "S" : "K";
@@ -2149,68 +2768,74 @@ function getFileName() {
 
 function renderItem() {
   var isSentence = state.phase === "sentences";
-  var items = isSentence ? state.sentences : state.keywords;
-  var total = state.index + (isSentence ? 0 : 150);
-  var pct   = Math.round((total / 300) * 100);
-  document.getElementById("sessionLabel").textContent  = state.participantId + " - " + state.language;
-  document.getElementById("phaseTitle").textContent    = isSentence ? "Sentences" : "Keywords";
-  document.getElementById("counterLabel").textContent  = (state.index + 1) + " / 150";
+  var items  = isSentence ? state.sentences : state.keywords;
+  var total  = state.index + (isSentence ? 0 : 150);
+  var pct    = Math.round((total / 300) * 100);
+
+  document.getElementById("sessionTitle").textContent  = state.participantId + " · " + state.language;
+  document.getElementById("sessionChip").textContent   = (isSentence ? "Sentence " : "Keyword ") + (state.index + 1) + " of 150";
+  document.getElementById("metaDone").textContent      = total;
+  document.getElementById("metaUploaded").textContent  = state.uploaded;
+  document.getElementById("metaPhase").textContent     = isSentence ? "S" : "K";
+  document.getElementById("metaTake").textContent      = state.take;
+  document.getElementById("tabSentences").className    = "phase-tab" + (isSentence ? " active" : "");
+  document.getElementById("tabKeywords").className     = "phase-tab" + (!isSentence ? " active" : "");
   document.getElementById("progressFill").style.width  = pct + "%";
-  document.getElementById("progressLabel").textContent = total + " / 300 total";
+  document.getElementById("progressText").textContent  = total + " / 300 complete";
   document.getElementById("progressPct").textContent   = pct + "%";
+  document.getElementById("phaseSummary").textContent  = isSentence ? "Sentences" : "Keywords";
+  document.getElementById("itemSummary").textContent   = (state.index + 1) + " / 150";
   document.getElementById("fileBadge").textContent     = getFileName();
-  document.getElementById("uploadStatus").style.display = "none";
-  document.getElementById("uploadStatus").className   = "upload-status";
-  document.getElementById("tab-sentences").className  = "phase-tab" + (isSentence ? " active" : "");
-  document.getElementById("tab-keywords").className   = "phase-tab" + (!isSentence ? " active" : "");
+  document.getElementById("folderLabel").textContent   = state.participantId + "_" + state.language;
+  clearNotice();
+
   var item = items[state.index];
   var promptText = document.getElementById("promptText");
   var promptHint = document.getElementById("promptHint");
   if (isSentence) {
     promptText.className   = "prompt-text";
     promptText.textContent = item;
-    promptHint.textContent = "Read naturally at a comfortable pace";
+    promptHint.textContent = "Read the full sentence clearly and naturally.";
   } else {
-    promptText.className   = "prompt-keyword";
+    promptText.className   = "prompt-text keyword";
     promptText.textContent = item || "(no keyword)";
-    promptHint.textContent = "Say the word twice with a short pause between";
+    promptHint.textContent = "Say the keyword twice with a short pause between.";
   }
+
   state.take      = 1;
   state.audioBlob = null;
   state.audioUrl  = null;
   setRecordingUI("idle");
+  saveProgress();
 }
 
 function setRecordingUI(mode) {
   var btn    = document.getElementById("recordBtn");
-  var icon   = document.getElementById("recIcon");
   var status = document.getElementById("recStatus");
   var retake = document.getElementById("retakeBtn");
   var play   = document.getElementById("playBtn");
   var next   = document.getElementById("nextBtn");
+  var svg    = "<svg viewBox=\"0 0 24 24\" fill=\"none\"><circle cx=\"12\" cy=\"12\" r=\"6\" fill=\"white\"/></svg>";
+  var svgStop = "<svg viewBox=\"0 0 24 24\" fill=\"none\"><rect x=\"8\" y=\"8\" width=\"8\" height=\"8\" rx=\"1\" fill=\"white\"/></svg>";
+
   if (mode === "idle") {
-    btn.className = "record-btn";
-    icon.innerHTML = "<circle cx=\"12\" cy=\"12\" r=\"6\" fill=\"white\"/>";
-    status.textContent = "Tap to start recording";
-    status.className = "rec-status";
+    btn.className = "record-btn"; btn.innerHTML = svg;
+    status.textContent = "Tap to start recording"; status.className = "status";
     retake.disabled = true; play.disabled = true; next.disabled = true;
   } else if (mode === "recording") {
-    btn.className = "record-btn recording";
-    icon.innerHTML = "<rect x=\"8\" y=\"8\" width=\"8\" height=\"8\" rx=\"1\" fill=\"white\"/>";
-    status.textContent = "Recording... tap to stop";
-    status.className = "rec-status recording";
+    btn.className = "record-btn recording"; btn.innerHTML = svgStop;
+    status.textContent = "Recording… tap again to stop"; status.className = "status recording";
     retake.disabled = true; play.disabled = true; next.disabled = true;
   } else if (mode === "done") {
-    btn.className = "record-btn has-audio";
-    icon.innerHTML = "<circle cx=\"12\" cy=\"12\" r=\"6\" fill=\"white\"/>";
-    status.textContent = "Recording saved - review or continue";
-    status.className = "rec-status done";
+    btn.className = "record-btn"; btn.innerHTML = svg;
+    status.textContent = "Recording ready — review or save."; status.className = "status ready";
     retake.disabled = false; play.disabled = false; next.disabled = false;
   }
 }
 
 async function toggleRecord() {
-  if (state.isRecording) { stopRecording(); } else { await startRecording(); }
+  if (state.isRecording) { stopRecording(); return; }
+  await startRecording();
 }
 
 async function startRecording() {
@@ -2221,7 +2846,7 @@ async function startRecording() {
     var ctx    = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: state.sampleRate });
     var source = ctx.createMediaStreamSource(stream);
     var analyser = ctx.createAnalyser();
-    analyser.fftSize = 256;
+    analyser.fftSize = 2048;
     source.connect(analyser);
     state.analyser = analyser; state.stream = stream;
     drawWave();
@@ -2232,8 +2857,9 @@ async function startRecording() {
     mr.start();
     state.mediaRecorder = mr; state.isRecording = true;
     setRecordingUI("recording");
+    setStatus("Recording…");
   } catch(e) {
-    alert("Microphone access denied. Please allow microphone access in your browser settings and try again.");
+    showNotice("bad", "Microphone access denied. Please allow microphone access in your browser settings and try again.");
   }
 }
 
@@ -2243,7 +2869,8 @@ function stopRecording() {
     state.stream.getTracks().forEach(function(t) { t.stop(); });
     state.isRecording = false;
     cancelAnimationFrame(state.animFrame);
-    clearWave();
+    clearWaveCanvas();
+    setStatus(state.participantId + " · " + state.language);
   }
 }
 
@@ -2257,28 +2884,32 @@ function finishRecording() {
 function drawWave() {
   var canvas = document.getElementById("waveCanvas");
   var ctx    = canvas.getContext("2d");
-  canvas.width  = canvas.offsetWidth;
-  canvas.height = 48;
-  var w = canvas.width, h = 48;
+  var w = canvas.offsetWidth || 700, h = 58;
+  canvas.width = w;
   function draw() {
     state.animFrame = requestAnimationFrame(draw);
-    var buf = new Uint8Array(state.analyser.frequencyBinCount);
+    var buf = new Uint8Array(state.analyser.fftSize);
     state.analyser.getByteTimeDomainData(buf);
-    ctx.clearRect(0, 0, w, h);
-    ctx.strokeStyle = "#1A6B4A"; ctx.lineWidth = 1.5;
+    ctx.fillStyle = "#f1ede5";
+    ctx.fillRect(0, 0, w, h);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = state.isRecording ? "#bf4f2b" : "#166245";
     ctx.beginPath();
+    var slice = w / buf.length;
     for (var i = 0; i < buf.length; i++) {
-      var y = (buf[i] / 128) * (h / 2);
-      if (i === 0) ctx.moveTo(0, y); else ctx.lineTo(i * (w / buf.length), y);
+      var y = (buf[i] / 128.0) * (h / 2);
+      if (i === 0) ctx.moveTo(0, y); else ctx.lineTo(i * slice, y);
     }
     ctx.stroke();
   }
   draw();
 }
 
-function clearWave() {
+function clearWaveCanvas() {
   var canvas = document.getElementById("waveCanvas");
-  canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+  var ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#f1ede5";
+  ctx.fillRect(0, 0, canvas.width, 58);
 }
 
 function playback() {
@@ -2290,8 +2921,7 @@ function retake() {
   state.take += 1;
   document.getElementById("fileBadge").textContent = getFileName();
   state.audioBlob = null; state.audioUrl = null;
-  setRecordingUI("idle"); clearWave();
-  document.getElementById("uploadStatus").style.display = "none";
+  setRecordingUI("idle"); clearWaveCanvas(); clearNotice();
 }
 
 async function nextItem() {
@@ -2305,6 +2935,7 @@ async function nextItem() {
   } else {
     document.getElementById("doneParticipant").textContent = state.participantId;
     document.getElementById("doneLang").textContent        = state.language;
+    sessionStorage.clear();
     showScreen("done");
   }
 }
@@ -2315,50 +2946,55 @@ function prevItem() {
 }
 
 async function uploadToGDrive() {
-  var statusEl = document.getElementById("uploadStatus");
-  statusEl.className   = "upload-status uploading";
-  statusEl.textContent = "Uploading to Google Drive...";
+  var noticeEl = document.getElementById("uploadNotice");
+  noticeEl.className = "notice show warn";
+  noticeEl.textContent = "Uploading to Google Drive…";
   try {
-    var token    = await getAccessToken();
     var sub      = state.phase === "sentences" ? "Sentences" : "Keywords";
-    var parentId = await ensureFolder(state.participantId + "_" + state.language, FOLDER_ID, token);
-    var subId    = await ensureFolder(sub, parentId, token);
+    var parentId = await ensureFolder(state.participantId + "_" + state.language, null);
+    var subId    = await ensureFolder(sub, parentId);
     var fileName = getFileName();
     var form     = new FormData();
     form.append("metadata", new Blob([JSON.stringify({ name: fileName, parents: [subId] })], { type: "application/json" }));
     form.append("file", state.audioBlob, fileName);
     var resp = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
       method: "POST",
-      headers: { Authorization: "Bearer " + token },
+      headers: { Authorization: "Bearer " + state.accessToken },
       body: form
     });
     if (resp.ok) {
-      statusEl.className   = "upload-status success";
-      statusEl.textContent = "Uploaded: " + fileName;
+      state.uploaded += 1;
+      document.getElementById("metaUploaded").textContent = state.uploaded;
+      document.getElementById("lastUpload").textContent = fileName;
+      noticeEl.className = "notice show good";
+      noticeEl.textContent = "Uploaded: " + fileName;
     } else {
       var err = await resp.json();
-      throw new Error(err.error ? err.error.message : resp.status);
+      throw new Error(err.error ? err.error.message : "Upload failed: " + resp.status);
     }
   } catch(e) {
-    statusEl.className   = "upload-status error";
-    statusEl.textContent = "Upload failed: " + e.message + ". Please try again.";
+    noticeEl.className = "notice show bad";
+    noticeEl.textContent = "Upload failed: " + e.message + ". Try again.";
     console.error(e);
   }
 }
 
-async function ensureFolder(name, parent, token) {
-  var key = parent + "/" + name;
+async function ensureFolder(name, parent) {
+  var key = (parent || "root") + "/" + name;
   if (folderCache[key]) return folderCache[key];
-  var q   = "name='" + name + "' and '" + parent + "' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false";
+  var parentClause = parent ? ("'" + parent + "' in parents") : ("'root' in parents");
+  var q   = "name='" + name + "' and " + parentClause + " and mimeType='application/vnd.google-apps.folder' and trashed=false";
   var res = await fetch("https://www.googleapis.com/drive/v3/files?q=" + encodeURIComponent(q) + "&fields=files(id)", {
-    headers: { Authorization: "Bearer " + token }
+    headers: { Authorization: "Bearer " + state.accessToken }
   });
   var data = await res.json();
   if (data.files && data.files.length > 0) { folderCache[key] = data.files[0].id; return folderCache[key]; }
+  var meta = { name: name, mimeType: "application/vnd.google-apps.folder" };
+  if (parent) meta.parents = [parent];
   var cr = await fetch("https://www.googleapis.com/drive/v3/files", {
     method: "POST",
-    headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
-    body: JSON.stringify({ name: name, mimeType: "application/vnd.google-apps.folder", parents: [parent] })
+    headers: { Authorization: "Bearer " + state.accessToken, "Content-Type": "application/json" },
+    body: JSON.stringify(meta)
   });
   var created = await cr.json();
   if (!created.id) throw new Error("Folder creation failed: " + JSON.stringify(created));
@@ -2367,27 +3003,32 @@ async function ensureFolder(name, parent, token) {
 }
 
 function resetSession() {
+  sessionStorage.clear();
   folderCache = {};
   Object.assign(state, {
     participantId:"", language:"", sentences:[], keywords:[],
-    phase:"sentences", index:0, take:1,
-    audioBlob:null, audioUrl:null
+    phase:"sentences", index:0, take:1, uploaded:0,
+    audioBlob:null, audioUrl:null, accessToken:null
   });
   document.getElementById("participantId").value = "";
   document.getElementById("language").value = "";
-  document.getElementById("scriptStatus").style.display = "none";
+  document.getElementById("scriptInfo").textContent = "Each language includes 150 sentences and 150 keywords.";
+  document.getElementById("setupNotice").className = "notice";
   showScreen("setup");
+  setStatus("Ready");
 }
 
 document.addEventListener("DOMContentLoaded", function() {
   document.getElementById("language").addEventListener("change", onLangChange);
-  document.getElementById("startBtn").addEventListener("click", startSession);
+  document.getElementById("beginBtn").addEventListener("click", beginSession);
   document.getElementById("recordBtn").addEventListener("click", toggleRecord);
   document.getElementById("retakeBtn").addEventListener("click", retake);
   document.getElementById("playBtn").addEventListener("click", playback);
   document.getElementById("prevBtn").addEventListener("click", prevItem);
   document.getElementById("nextBtn").addEventListener("click", nextItem);
+  document.getElementById("restartBtn").addEventListener("click", resetSession);
   document.getElementById("resetBtn").addEventListener("click", resetSession);
+  boot();
 });
 </script>
 </body>
