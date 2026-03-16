@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Ghanaian Clean Speech — Recorder</title>
-<script src="https://accounts.google.com/gsi/client"></script>
+<title>Ghanaian Clean Speech - Recorder</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
   :root {
@@ -50,7 +49,7 @@
   .phase-tab.active{background:var(--accent-light);color:var(--accent);border-color:var(--accent);}
   .prompt-box{background:var(--surface2);border-radius:var(--radius-sm);padding:20px;margin:16px 0;min-height:80px;display:flex;align-items:center;justify-content:center;}
   .prompt-text{font-size:20px;font-weight:500;text-align:center;line-height:1.5;letter-spacing:-0.3px;}
-  .prompt-keyword{font-family:'DM Mono',monospace;font-size:28px;font-weight:500;color:var(--accent);}
+  .prompt-keyword{font-family:'DM Mono',monospace;font-size:28px;font-weight:500;color:var(--accent);text-align:center;}
   .prompt-hint{font-size:12px;color:var(--text3);text-align:center;margin-top:8px;}
   .record-zone{display:flex;flex-direction:column;align-items:center;gap:16px;padding:20px 0 8px;}
   .record-btn{width:80px;height:80px;border-radius:50%;border:none;cursor:pointer;background:var(--accent);display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
@@ -62,18 +61,18 @@
   .rec-status{font-size:13px;color:var(--text3);min-height:18px;text-align:center;}
   .rec-status.recording{color:var(--red);font-weight:500;}
   .rec-status.done{color:var(--accent);font-weight:500;}
-  .waveform-wrap{width:100%;height:48px;background:var(--surface2);border-radius:var(--radius-sm);overflow:hidden;display:flex;align-items:center;justify-content:center;}
+  .waveform-wrap{width:100%;height:48px;background:var(--surface2);border-radius:var(--radius-sm);overflow:hidden;}
   canvas#waveCanvas{width:100%;height:48px;display:block;}
   .action-row{display:flex;gap:10px;margin-top:12px;}
   .action-row .btn{flex:1;}
-  .file-badge{font-family:'DM Mono',monospace;font-size:12px;background:var(--surface2);border-radius:6px;padding:6px 10px;color:var(--text2);text-align:center;letter-spacing:0.2px;margin-bottom:12px;}
+  .file-badge{font-family:'DM Mono',monospace;font-size:12px;background:var(--surface2);border-radius:6px;padding:6px 10px;color:var(--text2);text-align:center;margin-bottom:12px;}
   .upload-status{font-size:13px;padding:10px 14px;border-radius:var(--radius-sm);margin-top:10px;display:none;}
   .upload-status.uploading{background:var(--amber-light);color:var(--amber);display:block;}
   .upload-status.success{background:var(--accent-light);color:var(--accent);display:block;}
   .upload-status.error{background:var(--red-light);color:var(--red);display:block;}
   .nav-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px;}
-  .item-counter{font-size:13px;color:var(--text3);font-variant-numeric:tabular-nums;}
-  #scriptStatus{font-size:13px;padding:10px 14px;border-radius:8px;display:none;margin-top:4px;}
+  .item-counter{font-size:13px;color:var(--text3);}
+  #scriptStatus{font-size:13px;padding:10px 14px;border-radius:8px;display:none;margin-top:8px;}
   .done-screen{text-align:center;padding:32px 0;}
   .done-screen h2{font-size:24px;font-weight:600;margin-bottom:8px;}
   .done-screen p{color:var(--text2);font-size:15px;line-height:1.6;}
@@ -81,6 +80,10 @@
   .stat-card{background:var(--surface2);border-radius:var(--radius-sm);padding:14px;text-align:center;}
   .stat-card .val{font-size:22px;font-weight:600;color:var(--accent);}
   .stat-card .lbl{font-size:12px;color:var(--text3);margin-top:2px;}
+  .signing-in{text-align:center;padding:40px 20px;}
+  .signing-in p{color:var(--text2);margin-top:12px;font-size:15px;}
+  .spinner{width:40px;height:40px;border:3px solid var(--accent-light);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto;}
+  @keyframes spin{to{transform:rotate(360deg);}}
   @media(max-width:480px){.card{padding:18px;}.prompt-text{font-size:17px;}.prompt-keyword{font-size:24px;}.record-btn{width:70px;height:70px;}}
 </style>
 </head>
@@ -120,6 +123,14 @@
     </div>
   </div>
 
+  <!-- SIGNING IN SPINNER -->
+  <div id="screen-signing" class="screen">
+    <div class="card signing-in">
+      <div class="spinner"></div>
+      <p>Signing in with Google...<br/>You will be redirected briefly.</p>
+    </div>
+  </div>
+
   <!-- RECORDING -->
   <div id="screen-record" class="screen">
     <div class="card" style="margin-bottom:12px">
@@ -140,7 +151,7 @@
     <div class="card">
       <div class="file-badge" id="fileBadge">P012_EN_S001_T1.wav</div>
       <div class="prompt-box">
-        <div>
+        <div style="width:100%">
           <div class="prompt-text" id="promptText">Loading...</div>
           <div class="prompt-hint" id="promptHint"></div>
         </div>
@@ -2023,6 +2034,10 @@ const SCRIPTS = {
   },
 };
 
+var CLIENT_ID = '584738927714-av23beulsdtqftl7oo2g6c7mabnqpeho.apps.googleusercontent.com';
+var FOLDER_ID = '1WfwM9sc6mfXHeSKs3rXmRYiAMPYG_g97';
+var REDIRECT_URI = 'https://pdtetteh.github.io/clean-speech-recorder/';
+var SCOPE = 'https://www.googleapis.com/auth/drive.file';
 
 var state = {
   participantId: '', language: '',
@@ -2030,12 +2045,97 @@ var state = {
   phase: 'sentences', index: 0, take: 1,
   mediaRecorder: null, audioChunks: [], audioBlob: null, audioUrl: null,
   isRecording: false, accessToken: null,
-  clientId: '584738927714-av23beulsdtqftl7oo2g6c7mabnqpeho.apps.googleusercontent.com',
-  folderId: '1WfwM9sc6mfXHeSKs3rXmRYiAMPYG_g97',
-  sampleRate: 44100, analyser: null, animFrame: null, stream: null, audioContext: null
+  sampleRate: 44100, analyser: null, animFrame: null, stream: null
 };
 
 var folderCache = {};
+
+// ── OAuth redirect flow ────────────────────────────────────────────────────
+
+function startOAuthRedirect(pid, lang) {
+  // Save participant info to sessionStorage before redirecting
+  sessionStorage.setItem('cs_pid', pid);
+  sessionStorage.setItem('cs_lang', lang);
+  sessionStorage.setItem('cs_phase', 'sentences');
+  sessionStorage.setItem('cs_index', '0');
+
+  var params = [
+    'client_id=' + encodeURIComponent(CLIENT_ID),
+    'redirect_uri=' + encodeURIComponent(REDIRECT_URI),
+    'response_type=token',
+    'scope=' + encodeURIComponent(SCOPE),
+    'include_granted_scopes=true'
+  ].join('&');
+
+  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params;
+}
+
+function parseHashToken() {
+  var hash = window.location.hash.substring(1);
+  if (!hash) return null;
+  var params = {};
+  hash.split('&').forEach(function(part) {
+    var kv = part.split('=');
+    params[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1] || '');
+  });
+  return params.access_token || null;
+}
+
+function restoreSession(token) {
+  var pid  = sessionStorage.getItem('cs_pid');
+  var lang = sessionStorage.getItem('cs_lang');
+  var phase = sessionStorage.getItem('cs_phase') || 'sentences';
+  var index = parseInt(sessionStorage.getItem('cs_index') || '0', 10);
+  if (!pid || !lang || !SCRIPTS[lang]) return false;
+  state.participantId = pid;
+  state.language      = lang;
+  state.sentences     = SCRIPTS[lang].sentences;
+  state.keywords      = SCRIPTS[lang].keywords;
+  state.accessToken   = token;
+  state.phase         = phase;
+  state.index         = index;
+  state.take          = 1;
+  // Clear hash from URL without reload
+  history.replaceState(null, '', window.location.pathname);
+  return true;
+}
+
+// ── Boot ───────────────────────────────────────────────────────────────────
+
+function boot() {
+  var token = parseHashToken();
+  if (token) {
+    // Returning from Google OAuth redirect
+    if (restoreSession(token)) {
+      showScreen('record');
+      renderItem();
+    } else {
+      alert('Session data lost. Please start again.');
+      showScreen('setup');
+    }
+    return;
+  }
+  // Fresh load — check if mid-session (e.g. page refresh during recording)
+  var savedPid  = sessionStorage.getItem('cs_pid');
+  var savedLang = sessionStorage.getItem('cs_lang');
+  var savedToken = sessionStorage.getItem('cs_token');
+  if (savedPid && savedLang && savedToken && SCRIPTS[savedLang]) {
+    state.participantId = savedPid;
+    state.language      = savedLang;
+    state.sentences     = SCRIPTS[savedLang].sentences;
+    state.keywords      = SCRIPTS[savedLang].keywords;
+    state.accessToken   = savedToken;
+    state.phase         = sessionStorage.getItem('cs_phase') || 'sentences';
+    state.index         = parseInt(sessionStorage.getItem('cs_index') || '0', 10);
+    state.take          = 1;
+    showScreen('record');
+    renderItem();
+    return;
+  }
+  showScreen('setup');
+}
+
+// ── Setup screen ───────────────────────────────────────────────────────────
 
 function onLangChange() {
   var lang = document.getElementById('language').value;
@@ -2054,121 +2154,100 @@ function onLangChange() {
   }
 }
 
-async function startSession() {
-  var pid = document.getElementById('participantId').value.trim().toUpperCase();
+function startSession() {
+  var pid  = document.getElementById('participantId').value.trim().toUpperCase();
   var lang = document.getElementById('language').value;
-  if (!pid || !lang) { alert('Please enter your Participant ID and select a language.'); return; }
+  if (!pid)  { alert('Please enter your Participant ID.'); return; }
+  if (!lang) { alert('Please select a language.'); return; }
   if (!SCRIPTS[lang]) { alert('Script for ' + lang + ' not yet available. Contact the coordinator.'); return; }
-  if (typeof google === 'undefined' || !google.accounts) { alert('Google sign-in is still loading. Please wait a moment and try again.'); return; }
-  var btn = document.getElementById('startBtn');
-  btn.textContent = 'Signing in to Google...';
-  btn.disabled = true;
-  try {
-    state.participantId = pid;
-    state.language = lang;
-    state.sentences = SCRIPTS[lang].sentences;
-    state.keywords = SCRIPTS[lang].keywords;
-    state.phase = 'sentences';
-    state.index = 0;
-    state.take = 1;
-    folderCache = {};
-    await signInGoogle();
-    showScreen('record');
-    renderItem();
-  } catch(e) {
-    alert('Google sign-in failed or was cancelled. Please try again.');
-    btn.textContent = 'Begin Recording Session';
-    btn.disabled = false;
-  }
+  showScreen('screen-signing');
+  // Small delay so the spinner renders before the redirect
+  setTimeout(function() { startOAuthRedirect(pid, lang); }, 300);
 }
 
-function signInGoogle() {
-  return new Promise(function(res, rej) {
-    if (state.accessToken) { res(); return; }
-    try {
-      var client = google.accounts.oauth2.initTokenClient({
-        client_id: state.clientId,
-        scope: 'https://www.googleapis.com/auth/drive.file',
-        error_callback: function(err) { rej(err); },
-        callback: function(resp) {
-          if (resp.error) { rej(resp.error); return; }
-          state.accessToken = resp.access_token;
-          res();
-        }
-      });
-      client.requestAccessToken();
-    } catch(e) { rej(e); }
-  });
-}
+// ── Screen helpers ─────────────────────────────────────────────────────────
 
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
-  document.getElementById('screen-' + name).classList.add('active');
+  var el = document.getElementById('screen-' + name) || document.getElementById(name);
+  if (el) el.classList.add('active');
 }
+
+// ── Recording screen ───────────────────────────────────────────────────────
 
 function getFileName() {
   var type = state.phase === 'sentences' ? 'S' : 'K';
-  var num = String(state.index + 1).padStart(3, '0');
+  var num  = String(state.index + 1).padStart(3, '0');
   return state.participantId + '_' + state.language + '_' + type + num + '_T' + state.take + '.wav';
 }
 
+function saveProgress() {
+  sessionStorage.setItem('cs_phase', state.phase);
+  sessionStorage.setItem('cs_index', String(state.index));
+  sessionStorage.setItem('cs_token', state.accessToken || '');
+}
+
 function renderItem() {
-  var items = state.phase === 'sentences' ? state.sentences : state.keywords;
   var isSentence = state.phase === 'sentences';
+  var items = isSentence ? state.sentences : state.keywords;
   var total = state.index + (isSentence ? 0 : 150);
-  var pct = Math.round((total / 300) * 100);
-  document.getElementById('sessionLabel').textContent = state.participantId + ' - ' + state.language;
-  document.getElementById('phaseTitle').textContent = isSentence ? 'Sentences' : 'Keywords';
-  document.getElementById('counterLabel').textContent = (state.index + 1) + ' / 150';
-  document.getElementById('progressFill').style.width = pct + '%';
+  var pct   = Math.round((total / 300) * 100);
+
+  document.getElementById('sessionLabel').textContent  = state.participantId + ' - ' + state.language;
+  document.getElementById('phaseTitle').textContent    = isSentence ? 'Sentences' : 'Keywords';
+  document.getElementById('counterLabel').textContent  = (state.index + 1) + ' / 150';
+  document.getElementById('progressFill').style.width  = pct + '%';
   document.getElementById('progressLabel').textContent = total + ' / 300 total';
-  document.getElementById('progressPct').textContent = pct + '%';
-  document.getElementById('fileBadge').textContent = getFileName();
+  document.getElementById('progressPct').textContent   = pct + '%';
+  document.getElementById('fileBadge').textContent     = getFileName();
   document.getElementById('uploadStatus').style.display = 'none';
-  document.getElementById('uploadStatus').className = 'upload-status';
-  document.getElementById('tab-sentences').className = 'phase-tab' + (isSentence ? ' active' : '');
-  document.getElementById('tab-keywords').className = 'phase-tab' + (!isSentence ? ' active' : '');
+  document.getElementById('uploadStatus').className   = 'upload-status';
+  document.getElementById('tab-sentences').className  = 'phase-tab' + (isSentence ? ' active' : '');
+  document.getElementById('tab-keywords').className   = 'phase-tab' + (!isSentence ? ' active' : '');
+
+  var item = items[state.index];
   var promptText = document.getElementById('promptText');
   var promptHint = document.getElementById('promptHint');
-  var item = items[state.index];
   if (isSentence) {
-    promptText.className = 'prompt-text';
+    promptText.className   = 'prompt-text';
     promptText.textContent = item;
     promptHint.textContent = 'Read naturally at a comfortable pace';
   } else {
-    promptText.className = 'prompt-keyword';
+    promptText.className   = 'prompt-keyword';
     promptText.textContent = item || '(no keyword)';
     promptHint.textContent = 'Say the word twice with a short pause between';
   }
-  state.take = 1;
+  state.take     = 1;
   state.audioBlob = null;
-  state.audioUrl = null;
+  state.audioUrl  = null;
   setRecordingUI('idle');
+  saveProgress();
 }
 
 function setRecordingUI(mode) {
-  var btn = document.getElementById('recordBtn');
-  var icon = document.getElementById('recIcon');
+  var btn    = document.getElementById('recordBtn');
+  var icon   = document.getElementById('recIcon');
   var status = document.getElementById('recStatus');
   var retake = document.getElementById('retakeBtn');
-  var play = document.getElementById('playBtn');
-  var next = document.getElementById('nextBtn');
+  var play   = document.getElementById('playBtn');
+  var next   = document.getElementById('nextBtn');
+
   if (mode === 'idle') {
-    btn.className = 'record-btn';
-    icon.innerHTML = '<circle cx="12" cy="12" r="6" fill="white"/>';
+    btn.className    = 'record-btn';
+    icon.innerHTML   = '<circle cx="12" cy="12" r="6" fill="white"/>';
     status.textContent = 'Tap to start recording';
     status.className = 'rec-status';
     retake.disabled = true; play.disabled = true; next.disabled = true;
   } else if (mode === 'recording') {
-    btn.className = 'record-btn recording';
-    icon.innerHTML = '<rect x="8" y="8" width="8" height="8" rx="1" fill="white"/>';
+    btn.className    = 'record-btn recording';
+    icon.innerHTML   = '<rect x="8" y="8" width="8" height="8" rx="1" fill="white"/>';
     status.textContent = 'Recording... tap to stop';
     status.className = 'rec-status recording';
     retake.disabled = true; play.disabled = true; next.disabled = true;
   } else if (mode === 'done') {
-    btn.className = 'record-btn has-audio';
-    icon.innerHTML = '<circle cx="12" cy="12" r="6" fill="white"/>';
-    status.textContent = 'Recording saved — review or continue';
+    btn.className    = 'record-btn has-audio';
+    icon.innerHTML   = '<circle cx="12" cy="12" r="6" fill="white"/>';
+    status.textContent = 'Recording saved - review or continue';
     status.className = 'rec-status done';
     retake.disabled = false; play.disabled = false; next.disabled = false;
   }
@@ -2188,7 +2267,7 @@ async function startRecording() {
     var analyser = ctx.createAnalyser();
     analyser.fftSize = 256;
     source.connect(analyser);
-    state.analyser = analyser; state.audioContext = ctx; state.stream = stream;
+    state.analyser = analyser; state.stream = stream;
     drawWave();
     state.audioChunks = [];
     var mr = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
@@ -2198,7 +2277,7 @@ async function startRecording() {
     state.mediaRecorder = mr; state.isRecording = true;
     setRecordingUI('recording');
   } catch(e) {
-    alert('Microphone access denied. Please allow microphone permission and try again.');
+    alert('Microphone access denied. Please allow microphone permission in your browser settings and try again.');
   }
 }
 
@@ -2215,15 +2294,16 @@ function stopRecording() {
 function finishRecording() {
   var blob = new Blob(state.audioChunks, { type: 'audio/webm' });
   state.audioBlob = blob;
-  state.audioUrl = URL.createObjectURL(blob);
+  state.audioUrl  = URL.createObjectURL(blob);
   setRecordingUI('done');
 }
 
 function drawWave() {
   var canvas = document.getElementById('waveCanvas');
-  var ctx = canvas.getContext('2d');
-  var w = canvas.offsetWidth; var h = 48;
-  canvas.width = w; canvas.height = h;
+  var ctx    = canvas.getContext('2d');
+  canvas.width  = canvas.offsetWidth;
+  canvas.height = 48;
+  var w = canvas.width, h = 48;
   function draw() {
     state.animFrame = requestAnimationFrame(draw);
     var buf = new Uint8Array(state.analyser.frequencyBinCount);
@@ -2232,10 +2312,10 @@ function drawWave() {
     ctx.strokeStyle = '#1A6B4A'; ctx.lineWidth = 1.5;
     ctx.beginPath();
     var step = w / buf.length;
-    buf.forEach(function(v, i) {
-      var y = (v / 128) * (h / 2);
+    for (var i = 0; i < buf.length; i++) {
+      var y = (buf[i] / 128) * (h / 2);
       if (i === 0) ctx.moveTo(0, y); else ctx.lineTo(i * step, y);
-    });
+    }
     ctx.stroke();
   }
   draw();
@@ -2243,14 +2323,12 @@ function drawWave() {
 
 function clearWave() {
   var canvas = document.getElementById('waveCanvas');
-  var ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
 }
 
 function playback() {
   if (!state.audioUrl) return;
-  var audio = new Audio(state.audioUrl);
-  audio.play();
+  new Audio(state.audioUrl).play();
 }
 
 function retake() {
@@ -2271,7 +2349,8 @@ async function nextItem() {
     state.phase = 'keywords'; state.index = 0; renderItem();
   } else {
     document.getElementById('doneParticipant').textContent = state.participantId;
-    document.getElementById('doneLang').textContent = state.language;
+    document.getElementById('doneLang').textContent        = state.language;
+    sessionStorage.clear();
     showScreen('done');
   }
 }
@@ -2283,16 +2362,15 @@ function prevItem() {
 
 async function uploadToGDrive() {
   var statusEl = document.getElementById('uploadStatus');
-  statusEl.className = 'upload-status uploading';
+  statusEl.className   = 'upload-status uploading';
   statusEl.textContent = 'Uploading to Google Drive...';
   try {
     var subFolder = state.phase === 'sentences' ? 'Sentences' : 'Keywords';
-    var parentId = await ensureFolder(state.participantId + '_' + state.language, state.folderId);
-    var subId = await ensureFolder(subFolder, parentId);
-    var fileName = getFileName();
-    var metadata = { name: fileName, parents: [subId] };
-    var form = new FormData();
-    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+    var parentId  = await ensureFolder(state.participantId + '_' + state.language, FOLDER_ID);
+    var subId     = await ensureFolder(subFolder, parentId);
+    var fileName  = getFileName();
+    var form      = new FormData();
+    form.append('metadata', new Blob([JSON.stringify({ name: fileName, parents: [subId] })], { type: 'application/json' }));
     form.append('file', state.audioBlob, fileName);
     var resp = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
       method: 'POST',
@@ -2300,11 +2378,13 @@ async function uploadToGDrive() {
       body: form
     });
     if (resp.ok) {
-      statusEl.className = 'upload-status success';
+      statusEl.className   = 'upload-status success';
       statusEl.textContent = 'Uploaded: ' + fileName;
-    } else { throw new Error(await resp.text()); }
+    } else {
+      throw new Error(await resp.text());
+    }
   } catch(e) {
-    statusEl.className = 'upload-status error';
+    statusEl.className   = 'upload-status error';
     statusEl.textContent = 'Upload failed. Check your connection and try again.';
     console.error(e);
   }
@@ -2313,36 +2393,33 @@ async function uploadToGDrive() {
 async function ensureFolder(name, parent) {
   var key = parent + '/' + name;
   if (folderCache[key]) return folderCache[key];
-  var query = "name='" + name + "' and '" + parent + "' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false";
-  var searchResp = await fetch('https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(query) + '&fields=files(id)', {
+  var q    = "name='" + name + "' and '" + parent + "' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false";
+  var res  = await fetch('https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(q) + '&fields=files(id)', {
     headers: { Authorization: 'Bearer ' + state.accessToken }
   });
-  var searchData = await searchResp.json();
-  if (searchData.files && searchData.files.length > 0) {
-    folderCache[key] = searchData.files[0].id;
-    return folderCache[key];
-  }
-  var createResp = await fetch('https://www.googleapis.com/drive/v3/files', {
+  var data = await res.json();
+  if (data.files && data.files.length > 0) { folderCache[key] = data.files[0].id; return folderCache[key]; }
+  var cr   = await fetch('https://www.googleapis.com/drive/v3/files', {
     method: 'POST',
     headers: { Authorization: 'Bearer ' + state.accessToken, 'Content-Type': 'application/json' },
     body: JSON.stringify({ name: name, mimeType: 'application/vnd.google-apps.folder', parents: [parent] })
   });
-  var created = await createResp.json();
+  var created = await cr.json();
   folderCache[key] = created.id;
   return created.id;
 }
 
 function resetSession() {
-  state.participantId = ''; state.language = '';
-  state.sentences = []; state.keywords = [];
-  state.phase = 'sentences'; state.index = 0; state.take = 1;
-  state.audioBlob = null; state.audioUrl = null; state.accessToken = null;
+  sessionStorage.clear();
   folderCache = {};
+  Object.assign(state, {
+    participantId:'', language:'', sentences:[], keywords:[],
+    phase:'sentences', index:0, take:1,
+    audioBlob:null, audioUrl:null, accessToken:null
+  });
   document.getElementById('participantId').value = '';
   document.getElementById('language').value = '';
   document.getElementById('scriptStatus').style.display = 'none';
-  document.getElementById('startBtn').textContent = 'Begin Recording Session';
-  document.getElementById('startBtn').disabled = false;
   showScreen('setup');
 }
 
@@ -2355,6 +2432,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('prevBtn').addEventListener('click', prevItem);
   document.getElementById('nextBtn').addEventListener('click', nextItem);
   document.getElementById('resetBtn').addEventListener('click', resetSession);
+  boot();
 });
 </script>
 </body>
