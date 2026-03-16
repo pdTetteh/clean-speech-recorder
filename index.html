@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Ghanaian Clean Speech — Recorder</title>
+<script src="https://accounts.google.com/gsi/client"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
 
@@ -423,7 +424,7 @@
       </div>
       <div id="scriptStatus" style="font-size:13px;padding:10px 14px;border-radius:8px;background:var(--accent-light);color:var(--accent);display:none;margin-top:4px"></div>
       <div style="margin-top:18px">
-        <button class="btn btn-primary" onclick="startSession()" style="width:100%">Begin Recording Session</button>
+        <button class="btn btn-primary" id="startBtn" style="width:100%">Begin Recording Session</button>
       </div>
     </div>
   </div>
@@ -468,7 +469,7 @@
           <canvas id="waveCanvas"></canvas>
         </div>
 
-        <button class="record-btn" id="recordBtn" onclick="toggleRecord()">
+        <button class="record-btn" id="recordBtn">
           <svg id="recIcon" viewBox="0 0 24 24" fill="none">
             <circle cx="12" cy="12" r="6" fill="white"/>
           </svg>
@@ -480,13 +481,13 @@
       <div id="uploadStatus" class="upload-status"></div>
 
       <div class="action-row">
-        <button class="btn btn-danger" id="retakeBtn" onclick="retake()" disabled>Retake</button>
-        <button class="btn btn-ghost" id="playBtn" onclick="playback()" disabled>Play back</button>
+        <button class="btn btn-danger" id="retakeBtn" disabled>Retake</button>
+        <button class="btn btn-ghost" id="playBtn" disabled>Play back</button>
       </div>
 
       <div class="nav-row">
-        <button class="btn btn-ghost" onclick="prevItem()" id="prevBtn">← Previous</button>
-        <button class="btn btn-primary" id="nextBtn" onclick="nextItem()" disabled>Save & Next →</button>
+        <button class="btn btn-ghost" id="prevBtn">← Previous</button>
+        <button class="btn btn-primary" id="nextBtn" disabled>Save & Next →</button>
       </div>
     </div>
   </div>
@@ -505,7 +506,7 @@
         <div class="stat-card"><div class="val" id="doneParticipant">P012</div><div class="lbl">Participant</div></div>
         <div class="stat-card"><div class="val" id="doneLang">TWI</div><div class="lbl">Language</div></div>
       </div>
-      <button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="resetSession()">Start new session</button>
+      <button class="btn btn-ghost" id="resetBtn" style="width:100%;margin-top:8px">Start new session</button>
     </div>
   </div>
 
@@ -2174,7 +2175,7 @@ async function startSession() {
     return;
   }
 
-  const btn = document.querySelector('#screen-setup .btn-primary');
+  const btn = document.getElementById('startBtn');
   btn.textContent = 'Signing in to Google…';
   btn.disabled = true;
 
@@ -2524,8 +2525,18 @@ function resetSession() {
   });
   showScreen('setup');
 }
+// Wire up all button event listeners
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('startBtn').addEventListener('click', startSession);
+  document.getElementById('recordBtn').addEventListener('click', toggleRecord);
+  document.getElementById('retakeBtn').addEventListener('click', retake);
+  document.getElementById('playBtn').addEventListener('click', playback);
+  document.getElementById('prevBtn').addEventListener('click', prevItem);
+  document.getElementById('nextBtn').addEventListener('click', nextItem);
+  document.getElementById('resetBtn').addEventListener('click', resetSession);
+});
+
 </script>
 
-<script src="https://accounts.google.com/gsi/client"></script>
 </body>
 </html>
