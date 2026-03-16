@@ -2169,33 +2169,54 @@ async function startSession() {
     return;
   }
 
-  state.participantId = pid;
-  state.language = lang;
-  state.sentences = SCRIPTS[lang].sentences;
-  state.keywords = SCRIPTS[lang].keywords;
-  state.clientId = cid;
-  state.folderId = fid;
-  state.phase = 'sentences';
-  state.index = 0;
-  state.take = 1;
+  if (typeof google === 'undefined' || !google.accounts) {
+    alert('Google sign-in is still loading. Please wait a moment and try again.');
+    return;
+  }
 
-  await signInGoogle();
-  showScreen('record');
-  renderItem();
+  const btn = document.querySelector('#screen-setup .btn-primary');
+  btn.textContent = 'Signing in to Google…';
+  btn.disabled = true;
+
+  try {
+    state.participantId = pid;
+    state.language = lang;
+    state.sentences = SCRIPTS[lang].sentences;
+    state.keywords = SCRIPTS[lang].keywords;
+    state.clientId = cid;
+    state.folderId = fid;
+    state.phase = 'sentences';
+    state.index = 0;
+    state.take = 1;
+
+    await signInGoogle();
+    showScreen('record');
+    renderItem();
+  } catch(e) {
+    alert('Google sign-in failed or was cancelled. Please try again.');
+    btn.textContent = 'Begin Recording Session';
+    btn.disabled = false;
+  }
 }
 
 function signInGoogle() {
-  return new Promise((res) => {
+  return new Promise((res, rej) => {
     if (state.accessToken) { res(); return; }
-    const client = google.accounts.oauth2.initTokenClient({
-      client_id: state.clientId,
-      scope: 'https://www.googleapis.com/auth/drive.file',
-      callback: (resp) => {
-        state.accessToken = resp.access_token;
-        res();
-      }
-    });
-    client.requestAccessToken();
+    try {
+      const client = google.accounts.oauth2.initTokenClient({
+        client_id: state.clientId,
+        scope: 'https://www.googleapis.com/auth/drive.file',
+        error_callback: (err) => rej(err),
+        callback: (resp) => {
+          if (resp.error) { rej(resp.error); return; }
+          state.accessToken = resp.access_token;
+          res();
+        }
+      });
+      client.requestAccessToken();
+    } catch(e) {
+      rej(e);
+    }
   });
 }
 
@@ -2505,6 +2526,6 @@ function resetSession() {
 }
 </script>
 
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://accounts.google.com/gsi/client"></script>
 </body>
 </html>
