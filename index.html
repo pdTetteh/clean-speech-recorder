@@ -4,7 +4,6 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Ghanaian Clean Speech - Recording Portal</title>
-<script src="https://accounts.google.com/gsi/client"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -2679,27 +2678,19 @@ function doGoogleSignIn(pid, lang) {
   sessionStorage.setItem("cs_index",    "0");
   sessionStorage.setItem("cs_uploaded", "0");
   showScreen("signing");
+  // Use plain OAuth2 implicit flow — token returned in URL hash on redirect back
+  var redirectUri = window.location.href.split("?")[0].split("#")[0];
+  var params = [
+    "client_id="     + encodeURIComponent(CLIENT_ID),
+    "redirect_uri="  + encodeURIComponent(redirectUri),
+    "response_type=token",
+    "scope="         + encodeURIComponent(SCOPE),
+    "prompt=consent",
+    "include_granted_scopes=true"
+  ].join("&");
   setTimeout(function() {
-    var client = google.accounts.oauth2.initTokenClient({
-      client_id:    CLIENT_ID,
-      scope:        SCOPE,
-      ux_mode:      "redirect",
-      redirect_uri: window.location.href.split("?")[0].split("#")[0],
-      callback:     function(resp) {
-        if (resp && resp.access_token) {
-          state.accessToken = resp.access_token;
-          sessionStorage.setItem("cs_token", resp.access_token);
-          showScreen("record");
-          renderItem();
-        }
-      },
-      error_callback: function(err) {
-        showNotice("bad", "Google sign-in failed. Please try again.");
-        showScreen("setup");
-      }
-    });
-    client.requestAccessToken({ prompt: "consent" });
-  }, 300);
+    window.location.href = "https://accounts.google.com/o/oauth2/v2/auth?" + params;
+  }, 400);
 }
 
 // ── UI helpers ─────────────────────────────────────────────────────────────
