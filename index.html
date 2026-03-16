@@ -611,8 +611,8 @@
           </div>
 
           <p class="subtle">
-            Participants can record one item at a time. Each item is saved with the participant ID, language, phase, item number, and take number.
-            This page also keeps progress locally so a refresh does not wipe the session.
+            Participants record one item at a time. Each item is saved with the participant ID, language, phase, item number, and take number.
+            The page also keeps progress locally so a refresh does not wipe the session.
           </p>
 
           <div class="field">
@@ -653,7 +653,9 @@
             <div class="check"><span class="dot"></span><span>Do not close the page while an upload is running. If the network drops, the app queues the file and retries later.</span></div>
           </div>
 
-         
+          <div class="notice info show" style="margin-top:14px;">
+            This front-end is built for a backend upload endpoint. Do not place a Google service-account private key inside a public GitHub page.
+          </div>
         </div>
       </div>
     </section>
@@ -3032,6 +3034,11 @@ function previousItemPosition(session) {
 
 async function ensureMicrophone() {
   if (state.mediaStream) return state.mediaStream;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    const msg = 'This browser does not support microphone recording. Try Chrome, Edge, or Safari on HTTPS.';
+    showNotice(dom.setupNotice, 'bad', msg);
+    throw new Error(msg);
+  }
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: {
@@ -3042,7 +3049,7 @@ async function ensureMicrophone() {
     });
     state.mediaStream = stream;
     state.permissionReady = true;
-    setupMeter(stream);
+    await setupMeter(stream);
     setConnectivity(navigator.onLine ? "Microphone ready" : "Microphone ready · offline");
     return stream;
   } catch (err) {
@@ -3066,11 +3073,15 @@ function getSupportedMimeType() {
   return "";
 }
 
-function setupMeter(stream) {
+async function setupMeter(stream) {
   try {
-    if (state.audioContext) return;
+    if (state.audioContext) {
+      if (state.audioContext.state === 'suspended') await state.audioContext.resume();
+      return;
+    }
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     const audioContext = new AudioCtx();
+    if (audioContext.state === 'suspended') await audioContext.resume();
     const source = audioContext.createMediaStreamSource(stream);
     const analyser = audioContext.createAnalyser();
     analyser.fftSize = 2048;
@@ -3128,7 +3139,13 @@ async function toggleRecording() {
   clearNotice(dom.uploadNotice);
 
   if (!state.mediaStream) {
-    await ensureMicrophone();
+    try {
+      await ensureMicrophone();
+    } catch (err) {
+      dom.recordStatus.textContent = 'Microphone unavailable';
+      dom.recordStatus.className = 'status idle';
+      return;
+    }
   }
 
   if (!state.mediaRecorder || state.mediaRecorder.state === "inactive") {
