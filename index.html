@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Ghanaian Clean Speech - Recorder</title>
+<script src="https://accounts.google.com/gsi/client"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
   :root {
@@ -80,9 +81,7 @@
   .stat-card{background:var(--surface2);border-radius:var(--radius-sm);padding:14px;text-align:center;}
   .stat-card .val{font-size:22px;font-weight:600;color:var(--accent);}
   .stat-card .lbl{font-size:12px;color:var(--text3);margin-top:2px;}
-  .signing-in{text-align:center;padding:40px 20px;}
-  .signing-in p{color:var(--text2);margin-top:12px;font-size:15px;}
-  .spinner{width:40px;height:40px;border:3px solid var(--accent-light);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto;}
+  .spinner{width:40px;height:40px;border:3px solid var(--accent-light);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px;}
   @keyframes spin{to{transform:rotate(360deg);}}
   @media(max-width:480px){.card{padding:18px;}.prompt-text{font-size:17px;}.prompt-keyword{font-size:24px;}.record-btn{width:70px;height:70px;}}
 </style>
@@ -123,11 +122,11 @@
     </div>
   </div>
 
-  <!-- SIGNING IN SPINNER -->
+  <!-- SIGNING IN -->
   <div id="screen-signing" class="screen">
-    <div class="card signing-in">
+    <div class="card" style="text-align:center;padding:40px 24px;">
       <div class="spinner"></div>
-      <p>Signing in with Google...<br/>You will be redirected briefly.</p>
+      <p style="font-size:15px;color:var(--text2);">Connecting to Google Drive...<br/>Please wait.</p>
     </div>
   </div>
 
@@ -2034,99 +2033,40 @@ const SCRIPTS = {
   },
 };
 
-var CLIENT_ID = '584738927714-av23beulsdtqftl7oo2g6c7mabnqpeho.apps.googleusercontent.com';
-var FOLDER_ID = '1WfwM9sc6mfXHeSKs3rXmRYiAMPYG_g97';
-var REDIRECT_URI = 'https://pdtetteh.github.io/clean-speech-recorder/';
-var SCOPE = 'https://www.googleapis.com/auth/drive.file';
+var CLIENT_ID  = '584738927714-av23beulsdtqftl7oo2g6c7mabnqpeho.apps.googleusercontent.com';
+var FOLDER_ID  = '1WfwM9sc6mfXHeSKs3rXmRYiAMPYG_g97';
+var SCOPE      = 'https://www.googleapis.com/auth/drive.file';
 
 var state = {
-  participantId: '', language: '',
-  sentences: [], keywords: [],
-  phase: 'sentences', index: 0, take: 1,
-  mediaRecorder: null, audioChunks: [], audioBlob: null, audioUrl: null,
-  isRecording: false, accessToken: null,
-  sampleRate: 44100, analyser: null, animFrame: null, stream: null
+  participantId:'', language:'',
+  sentences:[], keywords:[],
+  phase:'sentences', index:0, take:1,
+  mediaRecorder:null, audioChunks:[], audioBlob:null, audioUrl:null,
+  isRecording:false, accessToken:null,
+  sampleRate:44100, analyser:null, animFrame:null, stream:null
 };
 
 var folderCache = {};
-
-// ── OAuth redirect flow ────────────────────────────────────────────────────
-
-function startOAuthRedirect(pid, lang) {
-  // Save participant info to sessionStorage before redirecting
-  sessionStorage.setItem('cs_pid', pid);
-  sessionStorage.setItem('cs_lang', lang);
-  sessionStorage.setItem('cs_phase', 'sentences');
-  sessionStorage.setItem('cs_index', '0');
-
-  var params = [
-    'client_id=' + encodeURIComponent(CLIENT_ID),
-    'redirect_uri=' + encodeURIComponent(REDIRECT_URI),
-    'response_type=token',
-    'scope=' + encodeURIComponent(SCOPE),
-    'include_granted_scopes=true'
-  ].join('&');
-
-  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params;
-}
-
-function parseHashToken() {
-  var hash = window.location.hash.substring(1);
-  if (!hash) return null;
-  var params = {};
-  hash.split('&').forEach(function(part) {
-    var kv = part.split('=');
-    params[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1] || '');
-  });
-  return params.access_token || null;
-}
-
-function restoreSession(token) {
-  var pid  = sessionStorage.getItem('cs_pid');
-  var lang = sessionStorage.getItem('cs_lang');
-  var phase = sessionStorage.getItem('cs_phase') || 'sentences';
-  var index = parseInt(sessionStorage.getItem('cs_index') || '0', 10);
-  if (!pid || !lang || !SCRIPTS[lang]) return false;
-  state.participantId = pid;
-  state.language      = lang;
-  state.sentences     = SCRIPTS[lang].sentences;
-  state.keywords      = SCRIPTS[lang].keywords;
-  state.accessToken   = token;
-  state.phase         = phase;
-  state.index         = index;
-  state.take          = 1;
-  // Clear hash from URL without reload
-  history.replaceState(null, '', window.location.pathname);
-  return true;
-}
+var tokenClient = null;
 
 // ── Boot ───────────────────────────────────────────────────────────────────
 
 function boot() {
-  var token = parseHashToken();
-  if (token) {
-    // Returning from Google OAuth redirect
-    if (restoreSession(token)) {
-      showScreen('record');
-      renderItem();
-    } else {
-      alert('Session data lost. Please start again.');
-      showScreen('setup');
-    }
-    return;
-  }
-  // Fresh load — check if mid-session (e.g. page refresh during recording)
-  var savedPid  = sessionStorage.getItem('cs_pid');
-  var savedLang = sessionStorage.getItem('cs_lang');
+  // Restore any saved session (e.g. after token refresh)
+  var savedPid   = sessionStorage.getItem('cs_pid');
+  var savedLang  = sessionStorage.getItem('cs_lang');
   var savedToken = sessionStorage.getItem('cs_token');
+  var savedPhase = sessionStorage.getItem('cs_phase') || 'sentences';
+  var savedIndex = parseInt(sessionStorage.getItem('cs_index') || '0', 10);
+
   if (savedPid && savedLang && savedToken && SCRIPTS[savedLang]) {
     state.participantId = savedPid;
     state.language      = savedLang;
     state.sentences     = SCRIPTS[savedLang].sentences;
     state.keywords      = SCRIPTS[savedLang].keywords;
     state.accessToken   = savedToken;
-    state.phase         = sessionStorage.getItem('cs_phase') || 'sentences';
-    state.index         = parseInt(sessionStorage.getItem('cs_index') || '0', 10);
+    state.phase         = savedPhase;
+    state.index         = savedIndex;
     state.take          = 1;
     showScreen('record');
     renderItem();
@@ -2135,17 +2075,17 @@ function boot() {
   showScreen('setup');
 }
 
-// ── Setup screen ───────────────────────────────────────────────────────────
+// ── Setup ──────────────────────────────────────────────────────────────────
 
 function onLangChange() {
   var lang = document.getElementById('language').value;
-  var el = document.getElementById('scriptStatus');
+  var el   = document.getElementById('scriptStatus');
   if (!lang) { el.style.display = 'none'; return; }
   if (SCRIPTS[lang]) {
     el.style.display = 'block';
     el.style.background = 'var(--accent-light)';
     el.style.color = 'var(--accent)';
-    el.textContent = 'Script loaded: 150 sentences and 150 keywords ready for ' + lang + '.';
+    el.textContent = 'Script ready: 150 sentences and 150 keywords for ' + lang + '.';
   } else {
     el.style.display = 'block';
     el.style.background = 'var(--amber-light)';
@@ -2159,21 +2099,64 @@ function startSession() {
   var lang = document.getElementById('language').value;
   if (!pid)  { alert('Please enter your Participant ID.'); return; }
   if (!lang) { alert('Please select a language.'); return; }
-  if (!SCRIPTS[lang]) { alert('Script for ' + lang + ' not yet available. Contact the coordinator.'); return; }
-  showScreen('screen-signing');
-  // Small delay so the spinner renders before the redirect
-  setTimeout(function() { startOAuthRedirect(pid, lang); }, 300);
+  if (!SCRIPTS[lang]) { alert('Script for ' + lang + ' not yet available.'); return; }
+
+  // Save to session before Google auth (in case of any page reload)
+  sessionStorage.setItem('cs_pid',   pid);
+  sessionStorage.setItem('cs_lang',  lang);
+  sessionStorage.setItem('cs_phase', 'sentences');
+  sessionStorage.setItem('cs_index', '0');
+
+  state.participantId = pid;
+  state.language      = lang;
+  state.sentences     = SCRIPTS[lang].sentences;
+  state.keywords      = SCRIPTS[lang].keywords;
+  state.phase         = 'sentences';
+  state.index         = 0;
+  state.take          = 1;
+
+  showScreen('signing');
+  requestGoogleToken();
 }
 
-// ── Screen helpers ─────────────────────────────────────────────────────────
+function requestGoogleToken() {
+  // Use Google Identity Services token client — opens a Google-hosted
+  // consent page in the SAME tab (ux_mode: 'redirect'), no popup needed.
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id:    CLIENT_ID,
+    scope:        SCOPE,
+    ux_mode:      'redirect',
+    redirect_uri: window.location.href.split('?')[0].split('#')[0],
+    callback:     onTokenReceived,   // called on same-tab redirect return
+    error_callback: function(err) {
+      alert('Google sign-in error: ' + (err.message || JSON.stringify(err)));
+      showScreen('setup');
+    }
+  });
+  tokenClient.requestAccessToken({ prompt: 'consent' });
+}
+
+function onTokenReceived(resp) {
+  if (resp.error) {
+    alert('Google sign-in failed: ' + resp.error);
+    showScreen('setup');
+    return;
+  }
+  state.accessToken = resp.access_token;
+  sessionStorage.setItem('cs_token', resp.access_token);
+  showScreen('record');
+  renderItem();
+}
+
+// ── Screen helper ──────────────────────────────────────────────────────────
 
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
-  var el = document.getElementById('screen-' + name) || document.getElementById(name);
+  var el = document.getElementById('screen-' + name);
   if (el) el.classList.add('active');
 }
 
-// ── Recording screen ───────────────────────────────────────────────────────
+// ── Recording ──────────────────────────────────────────────────────────────
 
 function getFileName() {
   var type = state.phase === 'sentences' ? 'S' : 'K';
@@ -2184,14 +2167,13 @@ function getFileName() {
 function saveProgress() {
   sessionStorage.setItem('cs_phase', state.phase);
   sessionStorage.setItem('cs_index', String(state.index));
-  sessionStorage.setItem('cs_token', state.accessToken || '');
 }
 
 function renderItem() {
   var isSentence = state.phase === 'sentences';
-  var items = isSentence ? state.sentences : state.keywords;
-  var total = state.index + (isSentence ? 0 : 150);
-  var pct   = Math.round((total / 300) * 100);
+  var items  = isSentence ? state.sentences : state.keywords;
+  var total  = state.index + (isSentence ? 0 : 150);
+  var pct    = Math.round((total / 300) * 100);
 
   document.getElementById('sessionLabel').textContent  = state.participantId + ' - ' + state.language;
   document.getElementById('phaseTitle').textContent    = isSentence ? 'Sentences' : 'Keywords';
@@ -2201,9 +2183,9 @@ function renderItem() {
   document.getElementById('progressPct').textContent   = pct + '%';
   document.getElementById('fileBadge').textContent     = getFileName();
   document.getElementById('uploadStatus').style.display = 'none';
-  document.getElementById('uploadStatus').className   = 'upload-status';
-  document.getElementById('tab-sentences').className  = 'phase-tab' + (isSentence ? ' active' : '');
-  document.getElementById('tab-keywords').className   = 'phase-tab' + (!isSentence ? ' active' : '');
+  document.getElementById('uploadStatus').className    = 'upload-status';
+  document.getElementById('tab-sentences').className   = 'phase-tab' + (isSentence ? ' active' : '');
+  document.getElementById('tab-keywords').className    = 'phase-tab' + (!isSentence ? ' active' : '');
 
   var item = items[state.index];
   var promptText = document.getElementById('promptText');
@@ -2217,7 +2199,7 @@ function renderItem() {
     promptText.textContent = item || '(no keyword)';
     promptHint.textContent = 'Say the word twice with a short pause between';
   }
-  state.take     = 1;
+  state.take      = 1;
   state.audioBlob = null;
   state.audioUrl  = null;
   setRecordingUI('idle');
@@ -2231,22 +2213,21 @@ function setRecordingUI(mode) {
   var retake = document.getElementById('retakeBtn');
   var play   = document.getElementById('playBtn');
   var next   = document.getElementById('nextBtn');
-
   if (mode === 'idle') {
-    btn.className    = 'record-btn';
-    icon.innerHTML   = '<circle cx="12" cy="12" r="6" fill="white"/>';
+    btn.className = 'record-btn';
+    icon.innerHTML = '<circle cx="12" cy="12" r="6" fill="white"/>';
     status.textContent = 'Tap to start recording';
     status.className = 'rec-status';
     retake.disabled = true; play.disabled = true; next.disabled = true;
   } else if (mode === 'recording') {
-    btn.className    = 'record-btn recording';
-    icon.innerHTML   = '<rect x="8" y="8" width="8" height="8" rx="1" fill="white"/>';
+    btn.className = 'record-btn recording';
+    icon.innerHTML = '<rect x="8" y="8" width="8" height="8" rx="1" fill="white"/>';
     status.textContent = 'Recording... tap to stop';
     status.className = 'rec-status recording';
     retake.disabled = true; play.disabled = true; next.disabled = true;
   } else if (mode === 'done') {
-    btn.className    = 'record-btn has-audio';
-    icon.innerHTML   = '<circle cx="12" cy="12" r="6" fill="white"/>';
+    btn.className = 'record-btn has-audio';
+    icon.innerHTML = '<circle cx="12" cy="12" r="6" fill="white"/>';
     status.textContent = 'Recording saved - review or continue';
     status.className = 'rec-status done';
     retake.disabled = false; play.disabled = false; next.disabled = false;
@@ -2262,7 +2243,7 @@ async function startRecording() {
     var stream = await navigator.mediaDevices.getUserMedia({
       audio: { sampleRate: state.sampleRate, channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false }
     });
-    var ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: state.sampleRate });
+    var ctx    = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: state.sampleRate });
     var source = ctx.createMediaStreamSource(stream);
     var analyser = ctx.createAnalyser();
     analyser.fftSize = 256;
@@ -2277,7 +2258,7 @@ async function startRecording() {
     state.mediaRecorder = mr; state.isRecording = true;
     setRecordingUI('recording');
   } catch(e) {
-    alert('Microphone access denied. Please allow microphone permission in your browser settings and try again.');
+    alert('Microphone access denied. Please allow microphone access and try again.');
   }
 }
 
@@ -2311,10 +2292,9 @@ function drawWave() {
     ctx.clearRect(0, 0, w, h);
     ctx.strokeStyle = '#1A6B4A'; ctx.lineWidth = 1.5;
     ctx.beginPath();
-    var step = w / buf.length;
     for (var i = 0; i < buf.length; i++) {
       var y = (buf[i] / 128) * (h / 2);
-      if (i === 0) ctx.moveTo(0, y); else ctx.lineTo(i * step, y);
+      if (i === 0) ctx.moveTo(0, y); else ctx.lineTo(i * (w / buf.length), y);
     }
     ctx.stroke();
   }
@@ -2365,11 +2345,11 @@ async function uploadToGDrive() {
   statusEl.className   = 'upload-status uploading';
   statusEl.textContent = 'Uploading to Google Drive...';
   try {
-    var subFolder = state.phase === 'sentences' ? 'Sentences' : 'Keywords';
-    var parentId  = await ensureFolder(state.participantId + '_' + state.language, FOLDER_ID);
-    var subId     = await ensureFolder(subFolder, parentId);
-    var fileName  = getFileName();
-    var form      = new FormData();
+    var sub      = state.phase === 'sentences' ? 'Sentences' : 'Keywords';
+    var parentId = await ensureFolder(state.participantId + '_' + state.language, FOLDER_ID);
+    var subId    = await ensureFolder(sub, parentId);
+    var fileName = getFileName();
+    var form     = new FormData();
     form.append('metadata', new Blob([JSON.stringify({ name: fileName, parents: [subId] })], { type: 'application/json' }));
     form.append('file', state.audioBlob, fileName);
     var resp = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
@@ -2393,8 +2373,8 @@ async function uploadToGDrive() {
 async function ensureFolder(name, parent) {
   var key = parent + '/' + name;
   if (folderCache[key]) return folderCache[key];
-  var q    = "name='" + name + "' and '" + parent + "' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false";
-  var res  = await fetch('https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(q) + '&fields=files(id)', {
+  var q   = "name='" + name + "' and '" + parent + "' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false";
+  var res = await fetch('https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(q) + '&fields=files(id)', {
     headers: { Authorization: 'Bearer ' + state.accessToken }
   });
   var data = await res.json();
