@@ -2364,7 +2364,7 @@ async function uploadToGDrive() {
   statusEl.textContent = 'Uploading to Google Drive...';
   try {
     var sub      = state.phase === 'sentences' ? 'Sentences' : 'Keywords';
-    var parentId = await ensureFolder(state.participantId + '_' + state.language, FOLDER_ID);
+    var parentId = await ensureFolder(state.participantId + '_' + state.language, null);
     var subId    = await ensureFolder(sub, parentId);
     var fileName = getFileName();
     var form     = new FormData();
@@ -2389,18 +2389,23 @@ async function uploadToGDrive() {
 }
 
 async function ensureFolder(name, parent) {
-  var key = parent + '/' + name;
+  var key = (parent || 'root') + '/' + name;
   if (folderCache[key]) return folderCache[key];
-  var q   = "name='" + name + "' and '" + parent + "' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false";
+  // Search for existing folder
+  var parentClause = parent ? ("'" + parent + "' in parents") : "'root' in parents";
+  var q   = "name='" + name + "' and " + parentClause + " and mimeType='application/vnd.google-apps.folder' and trashed=false";
   var res = await fetch('https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(q) + '&fields=files(id)', {
     headers: { Authorization: 'Bearer ' + state.accessToken }
   });
   var data = await res.json();
   if (data.files && data.files.length > 0) { folderCache[key] = data.files[0].id; return folderCache[key]; }
-  var cr   = await fetch('https://www.googleapis.com/drive/v3/files', {
+  // Create folder — only set parents if we have a parent ID
+  var meta = { name: name, mimeType: 'application/vnd.google-apps.folder' };
+  if (parent) meta.parents = [parent];
+  var cr = await fetch('https://www.googleapis.com/drive/v3/files', {
     method: 'POST',
     headers: { Authorization: 'Bearer ' + state.accessToken, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: name, mimeType: 'application/vnd.google-apps.folder', parents: [parent] })
+    body: JSON.stringify(meta)
   });
   var created = await cr.json();
   folderCache[key] = created.id;
