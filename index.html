@@ -2835,18 +2835,51 @@ async function toggleRecord() {
 
 async function startRecording() {
   try {
+    // Stop any existing stream cleanly first
+    if (state.stream) {
+      state.stream.getTracks().forEach(function(t) { t.stop(); });
+      state.stream = null;
+    }
+    if (state.audioContext) {
+      try { await state.audioContext.close(); } catch(e) {}
+      state.audioContext = null;
+      state.analyser = null;
+    }
+    cancelAnimationFrame(state.animFrame);
+
+    // Request mic without forcing sample rate - let device use its native rate
     var stream = await navigator.mediaDevices.getUserMedia({
-      audio: { sampleRate: state.sampleRate, channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+      audio: { channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false }
     });
-    var ctx    = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: state.sampleRate });
-    var source = ctx.createMediaStreamSource(stream);
+
+    // Create a fresh AudioContext each time (no forced sample rate)
+    var AudioCtx = window.AudioContext || window.webkitAudioContext;
+    var ctx = new AudioCtx();
+
+    // Resume context if suspended (required after page redirect on mobile)
+    if (ctx.state === "suspended") {
+      await ctx.resume();
+    }
+
+    var source   = ctx.createMediaStreamSource(stream);
     var analyser = ctx.createAnalyser();
     analyser.fftSize = 2048;
     source.connect(analyser);
-    state.analyser = analyser; state.stream = stream;
+    state.analyser     = analyser;
+    state.audioContext = ctx;
+    state.stream       = stream;
     drawWave();
+
     state.audioChunks = [];
-    var mr = new MediaRecorder(stream, { mimeType: "audio/webm;codecs=opus" });
+    // Pick best supported format
+    var mimeType = "";
+    var candidates = ["audio/webm;codecs=opus","audio/webm","audio/mp4","audio/ogg;codecs=opus"];
+    for (var i = 0; i < candidates.length; i++) {
+      if (window.MediaRecorder && MediaRecorder.isTypeSupported(candidates[i])) {
+        mimeType = candidates[i]; break;
+      }
+    }
+    var mr = mimeType ? new MediaRecorder(stream, { mimeType: mimeType }) : new MediaRecorder(stream);
     mr.ondataavailable = function(e) { if (e.data.size > 0) state.audioChunks.push(e.data); };
     mr.onstop = function() { finishRecording(); };
     mr.start();
@@ -2854,7 +2887,8 @@ async function startRecording() {
     setRecordingUI("recording");
     setStatus("Recording…");
   } catch(e) {
-    showNotice("bad", "Microphone access denied. Please allow microphone access in your browser settings and try again.");
+    console.error("startRecording error:", e);
+    showNotice("bad", "Microphone access denied or unavailable. Please allow microphone access and try again.");
   }
 }
 
