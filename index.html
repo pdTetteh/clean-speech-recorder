@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Ghanaian Clean Speech - Recording Portal</title>
 <style>
+
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
   :root {
@@ -581,8 +582,30 @@
     }
   }
 
+/* Extra styles */
 .spinner{width:36px;height:36px;border:3px solid var(--green-soft);border-top-color:var(--green);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px;}
 @keyframes spin{to{transform:rotate(360deg);}}
+
+.item-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px;margin-top:10px;max-height:280px;overflow-y:auto;}
+.item-btn{padding:8px 4px;border-radius:10px;font-size:12px;font-weight:600;text-align:center;cursor:pointer;border:1.5px solid var(--line-strong);background:#fff;color:var(--text);transition:all 0.12s;}
+.item-btn:hover{transform:translateY(-1px);}
+.item-btn.done{background:var(--green-soft);border-color:rgba(22,98,69,0.3);color:var(--green);}
+.item-btn.active{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 4px 12px rgba(22,98,69,0.25);}
+.item-btn.skipped{background:#fff7ed;border-color:#f59e0b;color:#92400e;}
+
+.phase-switcher{display:flex;gap:8px;margin-bottom:14px;}
+.phase-sw-btn{flex:1;padding:10px;border-radius:12px;font-size:13px;font-weight:700;text-align:center;cursor:pointer;border:1.5px solid var(--line-strong);background:#fff;color:var(--muted);transition:all 0.12s;}
+.phase-sw-btn.active{background:var(--green);border-color:var(--green);color:#fff;}
+.phase-sw-btn:hover:not(.active){background:var(--surface-soft);}
+
+.nav-arrows{display:flex;gap:8px;}
+.nav-arrows .btn{flex:1;}
+
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--muted);}
+.legend-item{display:flex;align-items:center;gap:5px;}
+.legend-dot{width:10px;height:10px;border-radius:3px;}
+
+@media(max-width:760px){.item-grid{grid-template-columns:repeat(auto-fill,minmax(44px,1fr));}}
 </style>
 </head>
 <body>
@@ -603,24 +626,17 @@
     <div class="pill" id="statusPill">Ready</div>
   </header>
 
-  <!-- SETUP SCREEN -->
+  <!-- SETUP -->
   <section id="screen-setup" class="screen active">
     <div class="grid two">
       <div class="card hero">
-        <div class="title-row">
-          <div>
-            <p class="section-label">Start session</p>
-            <h2>Record sentences and keywords</h2>
-          </div>
-        </div>
-        <p class="subtle">Enter your Participant ID and select your assigned language, then sign in with Google to begin. Your recordings will be saved to your Google Drive.</p>
-
-        <div class="field">
+        <p class="section-label">Start or resume session</p>
+        <h2 style="margin:0 0 10px;">Record sentences &amp; keywords</h2>
+        <p class="subtle">Enter your Participant ID and language. If you recorded before, your progress will be restored automatically.</p>
+        <div class="field" style="margin-top:16px;">
           <label for="participantId">Participant ID</label>
-          <input id="participantId" type="text" maxlength="16" placeholder="e.g. P012"/>
-          <div class="helper">Provided by the coordinator. Letters and numbers only.</div>
+          <input id="participantId" type="text" maxlength="16" placeholder="e.g. P012" autocomplete="off"/>
         </div>
-
         <div class="field">
           <label for="language">Language</label>
           <select id="language">
@@ -632,91 +648,81 @@
             <option value="HAU">Hausa (HAU)</option>
             <option value="DAG">Dagaare (DAG)</option>
           </select>
-          <div class="helper" id="scriptInfo">Each language includes 150 sentences and 150 keywords.</div>
+          <div class="helper" id="scriptInfo">Each language has 150 sentences and 150 keywords.</div>
         </div>
-
-        <div class="btn-row" style="margin-top:8px;">
-          <button class="btn btn-primary" id="beginBtn">Sign in with Google &amp; Begin</button>
-        </div>
-
-        <div id="setupNotice" class="notice"></div>
+        <div id="resumeInfo" class="notice" style="margin-bottom:12px;"></div>
+        <button class="btn btn-primary btn-full" id="beginBtn">Sign in with Google &amp; Begin</button>
+        <div id="setupNotice" class="notice" style="margin-top:10px;"></div>
       </div>
-
       <div class="card">
         <p class="section-label">Before recording</p>
         <div class="checklist">
-          <div class="check"><span class="dot"></span><span>Find a quiet room with no background noise or fans.</span></div>
-          <div class="check"><span class="dot"></span><span>Hold the phone 15-20 cm from your mouth.</span></div>
-          <div class="check"><span class="dot"></span><span>Read exactly what appears on screen at a natural pace.</span></div>
-          <div class="check"><span class="dot"></span><span>For keywords, say the word twice with a short pause between.</span></div>
-          <div class="check"><span class="dot"></span><span>Use Retake if you cough, hesitate, or misread.</span></div>
+          <div class="check"><span class="dot"></span><span>Find a quiet room. No fans, TV, or traffic noise.</span></div>
+          <div class="check"><span class="dot"></span><span>Hold the phone 15–20 cm from your mouth.</span></div>
+          <div class="check"><span class="dot"></span><span>Read clearly at a natural pace. Do not whisper or shout.</span></div>
+          <div class="check"><span class="dot"></span><span>For keywords, say the word <strong>twice</strong> with a short pause between.</span></div>
+          <div class="check"><span class="dot"></span><span>You can record sentences and keywords in any order. Your progress is saved.</span></div>
+          <div class="check"><span class="dot"></span><span>If you close the app and return, your session will resume exactly where you left off.</span></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- SIGNING IN SCREEN -->
+  <!-- SIGNING IN -->
   <section id="screen-signing" class="screen">
     <div class="card" style="text-align:center;padding:48px 24px;">
       <div class="spinner"></div>
       <h2 style="margin:0 0 8px;">Connecting to Google Drive</h2>
-      <p class="subtle">You will be redirected to sign in. Please wait...</p>
+      <p class="subtle">Redirecting to Google sign-in. Please wait...</p>
     </div>
   </section>
 
-  <!-- RECORDING SCREEN -->
+  <!-- RECORDING -->
   <section id="screen-record" class="screen">
     <div class="grid" style="gap:14px;">
+
+      <!-- Top bar: session info + progress -->
       <div class="card">
         <div class="title-row">
           <div>
             <p class="section-label">Session</p>
             <h2 id="sessionTitle">P012 &middot; EN</h2>
           </div>
-          <div class="session-chip" id="sessionChip">Sentence 1 of 150</div>
+          <div class="session-chip" id="sessionChip">0 / 300 done</div>
         </div>
-
         <div class="meta-grid">
-          <div class="meta"><div class="label">Total done</div><div class="value" id="metaDone">0</div></div>
+          <div class="meta"><div class="label">Sentences done</div><div class="value" id="metaSentDone">0/150</div></div>
+          <div class="meta"><div class="label">Keywords done</div><div class="value" id="metaKwDone">0/150</div></div>
           <div class="meta"><div class="label">Uploaded</div><div class="value" id="metaUploaded">0</div></div>
-          <div class="meta"><div class="label">Phase</div><div class="value" id="metaPhase">S</div></div>
-          <div class="meta"><div class="label">Take</div><div class="value" id="metaTake">1</div></div>
+          <div class="meta"><div class="label">Remaining</div><div class="value" id="metaRemaining">300</div></div>
         </div>
-
-        <div class="phase-tabs" style="margin-top:16px;">
-          <div class="phase-tab active" id="tabSentences">Sentences</div>
-          <div class="phase-tab" id="tabKeywords">Keywords</div>
-        </div>
-
-        <div class="progress-block" style="margin-top:16px;">
+        <div class="progress-block" style="margin-top:14px;">
           <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-          <div class="progress-labels">
-            <span id="progressText">0 / 300 complete</span>
-            <span id="progressPct">0%</span>
-          </div>
+          <div class="progress-labels"><span id="progressText">0 / 300 complete</span><span id="progressPct">0%</span></div>
         </div>
       </div>
 
       <div class="grid two">
+        <!-- Left: prompt + recorder -->
         <div class="card">
-          <p class="section-label">Current prompt</p>
+          <p class="section-label">Recording</p>
           <div class="filename" id="fileBadge">P012_EN_S001_T1.wav</div>
-          <div class="prompt-box" style="margin-top:14px;">
-            <div>
-              <p class="prompt-text" id="promptText">Loading...</p>
+          <div class="prompt-box" style="margin-top:12px;">
+            <div style="width:100%;">
+              <p class="prompt-text" id="promptText">Select an item from the panel</p>
               <div class="prompt-hint" id="promptHint"></div>
             </div>
           </div>
 
-          <div class="recorder-center">
+          <div class="recorder-center" style="margin-top:4px;">
             <div class="meter"><canvas id="waveCanvas" width="700" height="58"></canvas></div>
             <button class="record-btn" id="recordBtn">
               <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="6" fill="white"/></svg>
             </button>
-            <div class="status" id="recStatus">Tap to start recording</div>
+            <div class="status" id="recStatus">Select an item to begin</div>
           </div>
 
-          <div class="audio-panel" style="margin-top:16px;">
+          <div class="audio-panel" style="margin-top:14px;">
             <div class="small-grid">
               <button class="btn btn-danger" id="retakeBtn" disabled>Retake</button>
               <button class="btn btn-secondary" id="playBtn" disabled>Play back</button>
@@ -725,54 +731,59 @@
 
           <div id="uploadNotice" class="notice" style="margin-top:10px;"></div>
 
-          <div class="footer-actions" style="margin-top:12px;">
-            <button class="btn btn-secondary" id="prevBtn">Previous</button>
-            <button class="btn btn-primary" id="nextBtn" disabled>Save &amp; Next</button>
+          <div class="nav-arrows" style="margin-top:12px;">
+            <button class="btn btn-secondary" id="prevBtn" disabled>&larr; Previous</button>
+            <button class="btn btn-primary" id="saveNextBtn" disabled>Save &amp; Next &rarr;</button>
           </div>
+
+          <button class="btn btn-secondary btn-full" id="restartBtn" style="margin-top:10px;font-size:13px;">Switch participant / language</button>
         </div>
 
+        <!-- Right: item navigator -->
         <div class="card">
-          <p class="section-label">Upload status</p>
-          <div class="summary-list">
-            <div class="summary-item"><span>Phase</span><strong id="phaseSummary">Sentences</strong></div>
-            <div class="summary-item"><span>Current item</span><strong id="itemSummary">1 / 150</strong></div>
+          <p class="section-label">Item navigator</p>
+          <div class="phase-switcher">
+            <button class="phase-sw-btn active" id="swSentences">Sentences (150)</button>
+            <button class="phase-sw-btn" id="swKeywords">Keywords (150)</button>
+          </div>
+
+          <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--green-soft);border:1.5px solid rgba(22,98,69,0.3);"></div>Done</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--green);"></div>Current</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#fff;border:1.5px solid #d1cec8;"></div>Not yet recorded</div>
+          </div>
+
+          <div class="item-grid" id="itemGrid"></div>
+
+          <div class="summary-list" style="margin-top:14px;">
             <div class="summary-item"><span>Last upload</span><strong id="lastUpload">None yet</strong></div>
+            <div class="summary-item"><span>Current item</span><strong id="currentItemLabel">-</strong></div>
           </div>
-          <div class="btn-row" style="margin-top:16px;">
-            <button class="btn btn-secondary btn-full" id="restartBtn">Start new participant</button>
-          </div>
-          <ul class="muted-list" style="margin-top:14px;">
-            <li>Files are uploaded to your Google Drive after each recording.</li>
-            <li>Folder: <strong id="folderLabel">ParticipantID_LANG</strong></li>
-            <li>Subfolders: Sentences / Keywords</li>
-          </ul>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- DONE SCREEN -->
+  <!-- DONE -->
   <section id="screen-done" class="screen">
     <div class="card center">
       <div class="done-icon">
         <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#166245" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <p class="section-label">Session complete</p>
-      <h2 style="margin:0 0 8px;font-size:28px;letter-spacing:-0.03em;">Recording finished!</h2>
-      <p class="subtle">All 300 recordings are done and uploaded to Google Drive.</p>
+      <h2 style="margin:0 0 8px;font-size:28px;letter-spacing:-0.03em;">All recordings done!</h2>
+      <p class="subtle">All 300 recordings are complete and uploaded to your Google Drive.</p>
       <div class="summary-list" style="margin-top:20px;text-align:left;">
         <div class="summary-item"><span>Participant</span><strong id="doneParticipant">-</strong></div>
         <div class="summary-item"><span>Language</span><strong id="doneLang">-</strong></div>
-        <div class="summary-item"><span>Sentences</span><strong>150</strong></div>
-        <div class="summary-item"><span>Keywords</span><strong>150</strong></div>
+        <div class="summary-item"><span>Sentences</span><strong>150 / 150</strong></div>
+        <div class="summary-item"><span>Keywords</span><strong>150 / 150</strong></div>
       </div>
-      <div class="btn-row" style="margin-top:18px;">
-        <button class="btn btn-secondary" id="resetBtn">New session</button>
-      </div>
+      <button class="btn btn-secondary" id="resetBtn" style="margin-top:18px;">Start new session</button>
     </div>
   </section>
-
 </div>
+
 <script>
 const SCRIPTS = {
   EN: {
@@ -2617,16 +2628,50 @@ const SCRIPTS = {
 var CLIENT_ID = "584738927714-av23beulsdtqftl7oo2g6c7mabnqpeho.apps.googleusercontent.com";
 var SCOPE     = "https://www.googleapis.com/auth/drive.file";
 
+// ── State ──────────────────────────────────────────────────────────────────
 var state = {
   participantId:"", language:"",
   sentences:[], keywords:[],
-  phase:"sentences", index:0, take:1,
+  // progress[phase][index] = true if recorded+uploaded
+  progress:{ sentences:{}, keywords:{} },
+  currentPhase:"sentences", currentIndex:0,
+  phase:"sentences",   // navigator display phase
+  accessToken:null,
   mediaRecorder:null, audioChunks:[], audioBlob:null, audioUrl:null,
-  isRecording:false, accessToken:null, tokenExpiry:0,
-  sampleRate:44100, analyser:null, animFrame:null, stream:null,
+  isRecording:false, analyser:null, audioContext:null, animFrame:null, stream:null,
   uploaded:0
 };
-var folderCache = {};
+
+// ── Persistence (localStorage survives page close) ─────────────────────────
+
+function storageKey() {
+  return "gcs_" + state.participantId + "_" + state.language;
+}
+
+function saveProgress() {
+  if (!state.participantId || !state.language) return;
+  var saved = {
+    participantId: state.participantId,
+    language:      state.language,
+    progress:      state.progress,
+    currentPhase:  state.currentPhase,
+    currentIndex:  state.currentIndex,
+    uploaded:      state.uploaded
+  };
+  localStorage.setItem(storageKey(), JSON.stringify(saved));
+}
+
+function loadProgress(pid, lang) {
+  var key = "gcs_" + pid + "_" + lang;
+  try {
+    var raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) { return null; }
+}
+
+function clearProgress() {
+  localStorage.removeItem(storageKey());
+}
 
 // ── OAuth ──────────────────────────────────────────────────────────────────
 
@@ -2642,43 +2687,58 @@ function parseTokenFromHash() {
 }
 
 function boot() {
+  // Check if returning from OAuth redirect
   var hashToken = parseTokenFromHash();
   if (hashToken) {
-    sessionStorage.setItem("cs_token", hashToken);
+    localStorage.setItem("gcs_token", hashToken);
     history.replaceState(null, "", window.location.pathname);
   }
-  var token    = hashToken || sessionStorage.getItem("cs_token");
-  var pid      = sessionStorage.getItem("cs_pid");
-  var lang     = sessionStorage.getItem("cs_lang");
-  var phase    = sessionStorage.getItem("cs_phase") || "sentences";
-  var index    = parseInt(sessionStorage.getItem("cs_index") || "0", 10);
-  var uploaded = parseInt(sessionStorage.getItem("cs_uploaded") || "0", 10);
+
+  var token = hashToken || localStorage.getItem("gcs_token");
+  var pid   = localStorage.getItem("gcs_pending_pid");
+  var lang  = localStorage.getItem("gcs_pending_lang");
 
   if (token && pid && lang && SCRIPTS[lang]) {
+    // Clear pending keys
+    localStorage.removeItem("gcs_pending_pid");
+    localStorage.removeItem("gcs_pending_lang");
+
     state.accessToken   = token;
     state.participantId = pid;
     state.language      = lang;
     state.sentences     = SCRIPTS[lang].sentences;
     state.keywords      = SCRIPTS[lang].keywords;
-    state.phase         = phase;
-    state.index         = index;
-    state.uploaded      = uploaded;
-    state.take          = 1;
+
+    // Restore saved progress if any
+    var saved = loadProgress(pid, lang);
+    if (saved) {
+      state.progress     = saved.progress     || { sentences:{}, keywords:{} };
+      state.currentPhase = saved.currentPhase || "sentences";
+      state.currentIndex = saved.currentIndex || 0;
+      state.uploaded     = saved.uploaded     || 0;
+    } else {
+      state.progress     = { sentences:{}, keywords:{} };
+      state.currentPhase = "sentences";
+      state.currentIndex = 0;
+      state.uploaded     = 0;
+    }
+    state.phase = state.currentPhase;
+
     showScreen("record");
-    renderItem();
+    renderNavigator();
+    loadItem(state.currentPhase, state.currentIndex);
     return;
   }
+
+  // Check if we have a saved session to offer to resume
   showScreen("setup");
+  checkForSavedSession();
 }
 
 function doGoogleSignIn(pid, lang) {
-  sessionStorage.setItem("cs_pid",      pid);
-  sessionStorage.setItem("cs_lang",     lang);
-  sessionStorage.setItem("cs_phase",    "sentences");
-  sessionStorage.setItem("cs_index",    "0");
-  sessionStorage.setItem("cs_uploaded", "0");
+  localStorage.setItem("gcs_pending_pid",  pid);
+  localStorage.setItem("gcs_pending_lang", lang);
   showScreen("signing");
-  // Use plain OAuth2 implicit flow — token returned in URL hash on redirect back
   var redirectUri = window.location.href.split("?")[0].split("#")[0];
   var params = [
     "client_id="     + encodeURIComponent(CLIENT_ID),
@@ -2693,126 +2753,173 @@ function doGoogleSignIn(pid, lang) {
   }, 400);
 }
 
-// ── UI helpers ─────────────────────────────────────────────────────────────
+// ── Setup screen ───────────────────────────────────────────────────────────
 
-function showScreen(name) {
-  ["setup","signing","record","done"].forEach(function(s) {
-    document.getElementById("screen-" + s).classList.remove("active");
-  });
-  document.getElementById("screen-" + name).classList.add("active");
-}
-
-function showNotice(type, msg) {
-  var el = document.getElementById("uploadNotice");
-  el.className = "notice show " + type;
-  el.textContent = msg;
-}
-
-function clearNotice() {
-  var el = document.getElementById("uploadNotice");
-  el.className = "notice";
-  el.textContent = "";
-}
-
-function setStatus(text) {
-  document.getElementById("statusPill").textContent = text;
+function checkForSavedSession() {
+  var pid  = document.getElementById("participantId").value.trim().toUpperCase();
+  var lang = document.getElementById("language").value;
+  var el   = document.getElementById("resumeInfo");
+  if (!pid || !lang) { el.className = "notice"; el.textContent = ""; return; }
+  var saved = loadProgress(pid, lang);
+  if (saved) {
+    var done = Object.keys(saved.progress.sentences || {}).length + Object.keys(saved.progress.keywords || {}).length;
+    el.className = "notice show info";
+    el.textContent = "Saved progress found: " + done + " / 300 items recorded. Signing in will resume your session.";
+  } else {
+    el.className = "notice"; el.textContent = "";
+  }
 }
 
 function onLangChange() {
   var lang = document.getElementById("language").value;
   var info = document.getElementById("scriptInfo");
-  if (!lang) { info.textContent = "Each language includes 150 sentences and 150 keywords."; return; }
   if (SCRIPTS[lang]) {
     info.textContent = "Script ready: 150 sentences and 150 keywords for " + lang + ".";
-  } else {
+  } else if (lang) {
     info.textContent = "Script for " + lang + " not yet available. Contact the coordinator.";
+  } else {
+    info.textContent = "Each language has 150 sentences and 150 keywords.";
   }
+  checkForSavedSession();
 }
 
-// ── Setup ──────────────────────────────────────────────────────────────────
-
 function beginSession() {
-  var pid  = document.getElementById("participantId").value.trim().toUpperCase().replace(/[^A-Z0-9_-]/g, "");
+  var pid  = document.getElementById("participantId").value.trim().toUpperCase().replace(/[^A-Z0-9_-]/g,"");
   var lang = document.getElementById("language").value;
   var notice = document.getElementById("setupNotice");
   notice.className = "notice"; notice.textContent = "";
   if (!pid)  { notice.className="notice show bad"; notice.textContent="Please enter your Participant ID."; return; }
   if (!lang) { notice.className="notice show bad"; notice.textContent="Please select a language."; return; }
-  if (!SCRIPTS[lang]) { notice.className="notice show bad"; notice.textContent="Script for " + lang + " not yet available."; return; }
+  if (!SCRIPTS[lang]) { notice.className="notice show bad"; notice.textContent="Script for "+lang+" not yet available."; return; }
   doGoogleSignIn(pid, lang);
 }
 
-// ── Recording ──────────────────────────────────────────────────────────────
+// ── Screen helper ──────────────────────────────────────────────────────────
 
-function saveProgress() {
-  sessionStorage.setItem("cs_phase",    state.phase);
-  sessionStorage.setItem("cs_index",    String(state.index));
-  sessionStorage.setItem("cs_uploaded", String(state.uploaded));
+function showScreen(name) {
+  ["setup","signing","record","done"].forEach(function(s) {
+    document.getElementById("screen-"+s).classList.remove("active");
+  });
+  document.getElementById("screen-"+name).classList.add("active");
 }
 
-function getFileName() {
-  var type = state.phase === "sentences" ? "S" : "K";
-  var num  = String(state.index + 1).padStart(3, "0");
-  return state.participantId + "_" + state.language + "_" + type + num + "_T" + state.take + ".wav";
-}
+// ── Navigator ──────────────────────────────────────────────────────────────
 
-function renderItem() {
-  // Always ensure arrays are populated
-  if (!state.sentences.length && SCRIPTS[state.language]) {
-    state.sentences = SCRIPTS[state.language].sentences;
-    state.keywords  = SCRIPTS[state.language].keywords;
+function renderNavigator() {
+  var grid  = document.getElementById("itemGrid");
+  var items = state.phase === "sentences" ? state.sentences : state.keywords;
+  var progress = state.progress[state.phase] || {};
+  grid.innerHTML = "";
+  for (var i = 0; i < items.length; i++) {
+    (function(idx) {
+      var btn = document.createElement("button");
+      btn.className = "item-btn";
+      btn.textContent = idx + 1;
+      if (progress[idx]) btn.classList.add("done");
+      if (state.currentPhase === state.phase && state.currentIndex === idx) btn.classList.add("active");
+      btn.addEventListener("click", function() {
+        loadItem(state.phase, idx);
+      });
+      grid.appendChild(btn);
+    })(i);
   }
-  var isSentence = state.phase === "sentences";
-  var items  = isSentence ? state.sentences : state.keywords;
-  var total  = state.index + (isSentence ? 0 : 150);
-  var pct    = Math.round((total / 300) * 100);
+  // Update phase switcher counts
+  var sentDone = Object.keys(state.progress.sentences || {}).length;
+  var kwDone   = Object.keys(state.progress.keywords  || {}).length;
+  document.getElementById("swSentences").textContent = "Sentences (" + sentDone + "/150)";
+  document.getElementById("swKeywords").textContent  = "Keywords ("  + kwDone  + "/150)";
+  document.getElementById("swSentences").className = "phase-sw-btn" + (state.phase === "sentences" ? " active" : "");
+  document.getElementById("swKeywords").className  = "phase-sw-btn" + (state.phase === "keywords"  ? " active" : "");
+  updateTopStats();
+}
 
-  document.getElementById("sessionTitle").textContent  = state.participantId + " · " + state.language;
-  document.getElementById("sessionChip").textContent   = (isSentence ? "Sentence " : "Keyword ") + (state.index + 1) + " of 150";
-  document.getElementById("metaDone").textContent      = total;
+function updateTopStats() {
+  var sentDone = Object.keys(state.progress.sentences || {}).length;
+  var kwDone   = Object.keys(state.progress.keywords  || {}).length;
+  var total    = sentDone + kwDone;
+  var pct      = Math.round((total / 300) * 100);
+  document.getElementById("metaSentDone").textContent  = sentDone + "/150";
+  document.getElementById("metaKwDone").textContent    = kwDone   + "/150";
   document.getElementById("metaUploaded").textContent  = state.uploaded;
-  document.getElementById("metaPhase").textContent     = isSentence ? "S" : "K";
-  document.getElementById("metaTake").textContent      = state.take;
-  document.getElementById("tabSentences").className    = "phase-tab" + (isSentence ? " active" : "");
-  document.getElementById("tabKeywords").className     = "phase-tab" + (!isSentence ? " active" : "");
+  document.getElementById("metaRemaining").textContent = 300 - total;
+  document.getElementById("sessionChip").textContent   = total + " / 300 done";
   document.getElementById("progressFill").style.width  = pct + "%";
   document.getElementById("progressText").textContent  = total + " / 300 complete";
   document.getElementById("progressPct").textContent   = pct + "%";
-  document.getElementById("phaseSummary").textContent  = isSentence ? "Sentences" : "Keywords";
-  document.getElementById("itemSummary").textContent   = (state.index + 1) + " / 150";
-  document.getElementById("fileBadge").textContent     = getFileName();
-  document.getElementById("folderLabel").textContent   = state.participantId + "_" + state.language;
-  clearNotice();
+  document.getElementById("sessionTitle").textContent  = state.participantId + " · " + state.language;
+}
 
-  var item = items[state.index];
-  var promptText = document.getElementById("promptText");
-  var promptHint = document.getElementById("promptHint");
-  if (isSentence) {
-    promptText.className   = "prompt-text";
-    promptText.textContent = item;
-    promptHint.textContent = "Read the full sentence clearly and naturally.";
-  } else {
-    promptText.className   = "prompt-text keyword";
-    promptText.textContent = item || "(no keyword)";
-    promptHint.textContent = "Say the keyword twice with a short pause between.";
-  }
+// ── Load a specific item ───────────────────────────────────────────────────
 
-  state.take      = 1;
+function loadItem(phase, index) {
+  // Stop any current recording
+  if (state.isRecording) stopRecording();
+  state.currentPhase = phase;
+  state.currentIndex = index;
   state.audioBlob = null;
   state.audioUrl  = null;
+
+  var items = phase === "sentences" ? state.sentences : state.keywords;
+  var item  = items[index] || "(no text)";
+  var take  = 1;
+
+  // File name
+  var type = phase === "sentences" ? "S" : "K";
+  var num  = String(index + 1).padStart(3, "0");
+  var fileName = state.participantId + "_" + state.language + "_" + type + num + "_T" + take + ".wav";
+
+  document.getElementById("fileBadge").textContent      = fileName;
+  document.getElementById("currentItemLabel").textContent = (phase === "sentences" ? "S" : "K") + (index+1) + " of 150";
+
+  var promptEl = document.getElementById("promptText");
+  var hintEl   = document.getElementById("promptHint");
+  if (phase === "sentences") {
+    promptEl.className   = "prompt-text";
+    promptEl.textContent = item;
+    hintEl.textContent   = "Read the full sentence clearly and naturally.";
+  } else {
+    promptEl.className   = "prompt-text keyword";
+    promptEl.textContent = item || "(no keyword)";
+    hintEl.textContent   = "Say the keyword twice with a short pause between.";
+  }
+
+  // Update navigator highlight
+  renderNavigator();
+
+  // Prev/next arrows
+  document.getElementById("prevBtn").disabled = (phase === "sentences" && index === 0);
+
   setRecordingUI("idle");
   saveProgress();
 }
+
+function getNextItem() {
+  // Stay strictly within the current phase — never auto-jump to the other phase
+  // Participants switch phases manually using the phase switcher buttons
+  var ph   = state.currentPhase;
+  var list = ph === "sentences" ? state.sentences : state.keywords;
+  // Find next unrecorded item after current index in same phase
+  for (var i = state.currentIndex + 1; i < list.length; i++) {
+    if (!state.progress[ph][i]) return { phase: ph, index: i };
+  }
+  // If none ahead, wrap and look from beginning (skip already done)
+  for (var i = 0; i < state.currentIndex; i++) {
+    if (!state.progress[ph][i]) return { phase: ph, index: i };
+  }
+  // All items in this phase are done — stay on current item, don't jump
+  return null;
+}
+
+// ── Recording UI ───────────────────────────────────────────────────────────
 
 function setRecordingUI(mode) {
   var btn    = document.getElementById("recordBtn");
   var status = document.getElementById("recStatus");
   var retake = document.getElementById("retakeBtn");
   var play   = document.getElementById("playBtn");
-  var next   = document.getElementById("nextBtn");
-  var svg    = "<svg viewBox=\"0 0 24 24\" fill=\"none\"><circle cx=\"12\" cy=\"12\" r=\"6\" fill=\"white\"/></svg>";
-  var svgStop = "<svg viewBox=\"0 0 24 24\" fill=\"none\"><rect x=\"8\" y=\"8\" width=\"8\" height=\"8\" rx=\"1\" fill=\"white\"/></svg>";
-
+  var next   = document.getElementById("saveNextBtn");
+  var svg    = '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="6" fill="white"/></svg>';
+  var svgStop= '<svg viewBox="0 0 24 24" fill="none"><rect x="8" y="8" width="8" height="8" rx="1" fill="white"/></svg>';
   if (mode === "idle") {
     btn.className = "record-btn"; btn.innerHTML = svg;
     status.textContent = "Tap to start recording"; status.className = "status";
@@ -2823,88 +2930,68 @@ function setRecordingUI(mode) {
     retake.disabled = true; play.disabled = true; next.disabled = true;
   } else if (mode === "done") {
     btn.className = "record-btn"; btn.innerHTML = svg;
-    status.textContent = "Recording ready — review or save."; status.className = "status ready";
+    status.textContent = "Ready — review or save"; status.className = "status ready";
     retake.disabled = false; play.disabled = false; next.disabled = false;
   }
 }
 
 async function toggleRecord() {
-  if (state.isRecording) { stopRecording(); return; }
-  await startRecording();
+  if (state.isRecording) { stopRecording(); } else { await startRecording(); }
 }
 
 async function startRecording() {
   try {
-    // Stop any existing stream cleanly first
-    if (state.stream) {
-      state.stream.getTracks().forEach(function(t) { t.stop(); });
-      state.stream = null;
-    }
-    if (state.audioContext) {
-      try { await state.audioContext.close(); } catch(e) {}
-      state.audioContext = null;
-      state.analyser = null;
-    }
+    if (state.stream) { state.stream.getTracks().forEach(function(t){t.stop();}); state.stream=null; }
+    if (state.audioContext) { try{await state.audioContext.close();}catch(e){} state.audioContext=null; state.analyser=null; }
     cancelAnimationFrame(state.animFrame);
 
-    // Request mic without forcing sample rate - let device use its native rate
     var stream = await navigator.mediaDevices.getUserMedia({
-      audio: { channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+      audio:{ channelCount:1, echoCancellation:false, noiseSuppression:false, autoGainControl:false }
     });
-
-    // Create a fresh AudioContext each time (no forced sample rate)
     var AudioCtx = window.AudioContext || window.webkitAudioContext;
     var ctx = new AudioCtx();
-
-    // Resume context if suspended (required after page redirect on mobile)
-    if (ctx.state === "suspended") {
-      await ctx.resume();
-    }
-
-    var source   = ctx.createMediaStreamSource(stream);
+    if (ctx.state === "suspended") await ctx.resume();
+    var src = ctx.createMediaStreamSource(stream);
     var analyser = ctx.createAnalyser();
     analyser.fftSize = 2048;
-    source.connect(analyser);
-    state.analyser     = analyser;
-    state.audioContext = ctx;
-    state.stream       = stream;
+    src.connect(analyser);
+    state.analyser = analyser; state.audioContext = ctx; state.stream = stream;
     drawWave();
 
     state.audioChunks = [];
-    // Pick best supported format
-    var mimeType = "";
     var candidates = ["audio/webm;codecs=opus","audio/webm","audio/mp4","audio/ogg;codecs=opus"];
-    for (var i = 0; i < candidates.length; i++) {
-      if (window.MediaRecorder && MediaRecorder.isTypeSupported(candidates[i])) {
-        mimeType = candidates[i]; break;
-      }
+    var mimeType = "";
+    for (var i=0;i<candidates.length;i++) {
+      if (window.MediaRecorder && MediaRecorder.isTypeSupported(candidates[i])){mimeType=candidates[i];break;}
     }
-    var mr = mimeType ? new MediaRecorder(stream, { mimeType: mimeType }) : new MediaRecorder(stream);
-    mr.ondataavailable = function(e) { if (e.data.size > 0) state.audioChunks.push(e.data); };
-    mr.onstop = function() { finishRecording(); };
+    var mr = mimeType ? new MediaRecorder(stream,{mimeType:mimeType}) : new MediaRecorder(stream);
+    mr.ondataavailable = function(e){if(e.data.size>0)state.audioChunks.push(e.data);};
+    mr.onstop = function(){finishRecording();};
     mr.start();
     state.mediaRecorder = mr; state.isRecording = true;
     setRecordingUI("recording");
-    setStatus("Recording…");
+    document.getElementById("statusPill").textContent = "Recording…";
   } catch(e) {
-    console.error("startRecording error:", e);
-    showNotice("bad", "Microphone access denied or unavailable. Please allow microphone access and try again.");
+    console.error(e);
+    var noticeEl = document.getElementById("uploadNotice");
+    noticeEl.className="notice show bad";
+    noticeEl.textContent="Microphone access denied. Please allow microphone access and try again.";
   }
 }
 
 function stopRecording() {
   if (state.mediaRecorder && state.isRecording) {
     state.mediaRecorder.stop();
-    state.stream.getTracks().forEach(function(t) { t.stop(); });
+    state.stream.getTracks().forEach(function(t){t.stop();});
     state.isRecording = false;
     cancelAnimationFrame(state.animFrame);
     clearWaveCanvas();
-    setStatus(state.participantId + " · " + state.language);
+    document.getElementById("statusPill").textContent = state.participantId + " · " + state.language;
   }
 }
 
 function finishRecording() {
-  var blob = new Blob(state.audioChunks, { type: "audio/webm" });
+  var blob = new Blob(state.audioChunks, {type:"audio/webm"});
   state.audioBlob = blob;
   state.audioUrl  = URL.createObjectURL(blob);
   setRecordingUI("done");
@@ -2913,21 +3000,20 @@ function finishRecording() {
 function drawWave() {
   var canvas = document.getElementById("waveCanvas");
   var ctx    = canvas.getContext("2d");
-  var w = canvas.offsetWidth || 700, h = 58;
-  canvas.width = w;
+  canvas.width = canvas.offsetWidth || 700;
+  var w = canvas.width, h = 58;
   function draw() {
     state.animFrame = requestAnimationFrame(draw);
     var buf = new Uint8Array(state.analyser.fftSize);
     state.analyser.getByteTimeDomainData(buf);
-    ctx.fillStyle = "#f1ede5";
-    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = "#f1ede5"; ctx.fillRect(0,0,w,h);
     ctx.lineWidth = 2;
     ctx.strokeStyle = state.isRecording ? "#bf4f2b" : "#166245";
     ctx.beginPath();
     var slice = w / buf.length;
-    for (var i = 0; i < buf.length; i++) {
-      var y = (buf[i] / 128.0) * (h / 2);
-      if (i === 0) ctx.moveTo(0, y); else ctx.lineTo(i * slice, y);
+    for (var i=0;i<buf.length;i++) {
+      var y = (buf[i]/128.0)*(h/2);
+      if(i===0)ctx.moveTo(0,y);else ctx.lineTo(i*slice,y);
     }
     ctx.stroke();
   }
@@ -2935,10 +3021,10 @@ function drawWave() {
 }
 
 function clearWaveCanvas() {
-  var canvas = document.getElementById("waveCanvas");
-  var ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#f1ede5";
-  ctx.fillRect(0, 0, canvas.width, 58);
+  var c = document.getElementById("waveCanvas");
+  var ctx = c.getContext("2d");
+  ctx.fillStyle="#f1ede5";
+  ctx.fillRect(0,0,c.width,58);
 }
 
 function playback() {
@@ -2947,119 +3033,162 @@ function playback() {
 }
 
 function retake() {
-  state.take += 1;
-  document.getElementById("fileBadge").textContent = getFileName();
   state.audioBlob = null; state.audioUrl = null;
-  setRecordingUI("idle"); clearWaveCanvas(); clearNotice();
+  setRecordingUI("idle"); clearWaveCanvas();
+  document.getElementById("uploadNotice").className = "notice";
 }
 
-async function nextItem() {
+async function saveAndNext() {
   if (!state.audioBlob) return;
-  // Always ensure arrays are populated (guard against empty state after redirect)
-  if (!state.sentences.length && SCRIPTS[state.language]) {
-    state.sentences = SCRIPTS[state.language].sentences;
-    state.keywords  = SCRIPTS[state.language].keywords;
-  }
   await uploadToGDrive();
-  var items = state.phase === "sentences" ? state.sentences : state.keywords;
-  if (state.index < items.length - 1) {
-    state.index += 1; renderItem();
-  } else if (state.phase === "sentences") {
-    state.phase = "keywords"; state.index = 0; renderItem();
-  } else {
+  // Mark as done
+  state.progress[state.currentPhase][state.currentIndex] = true;
+  saveProgress();
+
+  // Check if everything is done
+  var sentDone = Object.keys(state.progress.sentences).length;
+  var kwDone   = Object.keys(state.progress.keywords).length;
+  if (sentDone >= 150 && kwDone >= 150) {
     document.getElementById("doneParticipant").textContent = state.participantId;
     document.getElementById("doneLang").textContent        = state.language;
-    sessionStorage.clear();
+    clearProgress();
     showScreen("done");
+    return;
+  }
+
+  // Jump to next unrecorded item in same phase
+  var next = getNextItem();
+  if (next) {
+    loadItem(next.phase, next.index);
+  } else {
+    // All items in this phase are done — show message, stay put
+    var noticeEl = document.getElementById("uploadNotice");
+    var ph = state.currentPhase === "sentences" ? "Sentences" : "Keywords";
+    var other = state.currentPhase === "sentences" ? "Keywords" : "Sentences";
+    var sentDone = Object.keys(state.progress.sentences).length;
+    var kwDone   = Object.keys(state.progress.keywords).length;
+    if (sentDone >= 150 && kwDone >= 150) {
+      // already handled above
+    } else {
+      noticeEl.className   = "notice show good";
+      noticeEl.textContent = "All " + ph + " done! Switch to " + other + " using the panel on the right.";
+    }
+    renderNavigator();
   }
 }
 
-function prevItem() {
-  if (state.index > 0) { state.index -= 1; renderItem(); }
-  else if (state.phase === "keywords") { state.phase = "sentences"; state.index = 149; renderItem(); }
+function goPrev() {
+  var phase = state.currentPhase;
+  var index = state.currentIndex;
+  if (index > 0) { loadItem(phase, index - 1); }
+  else if (phase === "keywords") { loadItem("sentences", state.sentences.length - 1); }
 }
+
+// ── Upload ─────────────────────────────────────────────────────────────────
 
 async function uploadToGDrive() {
   var noticeEl = document.getElementById("uploadNotice");
   noticeEl.className = "notice show warn";
   noticeEl.textContent = "Uploading to Google Drive…";
   try {
-    var sub      = state.phase === "sentences" ? "Sentences" : "Keywords";
+    var phase    = state.currentPhase;
+    var index    = state.currentIndex;
+    var subName  = phase === "sentences" ? "Sentences" : "Keywords";
     var parentId = await ensureFolder(state.participantId + "_" + state.language, null);
-    var subId    = await ensureFolder(sub, parentId);
-    var fileName = getFileName();
+    var subId    = await ensureFolder(subName, parentId);
+    var type     = phase === "sentences" ? "S" : "K";
+    var num      = String(index + 1).padStart(3, "0");
+    var fileName = state.participantId + "_" + state.language + "_" + type + num + "_T1.wav";
     var form     = new FormData();
-    form.append("metadata", new Blob([JSON.stringify({ name: fileName, parents: [subId] })], { type: "application/json" }));
+    form.append("metadata", new Blob([JSON.stringify({name:fileName,parents:[subId]})],{type:"application/json"}));
     form.append("file", state.audioBlob, fileName);
-    var resp = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
-      method: "POST",
-      headers: { Authorization: "Bearer " + state.accessToken },
-      body: form
+    var resp = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",{
+      method:"POST",
+      headers:{Authorization:"Bearer "+state.accessToken},
+      body:form
     });
     if (resp.ok) {
       state.uploaded += 1;
       document.getElementById("metaUploaded").textContent = state.uploaded;
-      document.getElementById("lastUpload").textContent = fileName;
-      noticeEl.className = "notice show good";
+      document.getElementById("lastUpload").textContent   = fileName;
+      noticeEl.className   = "notice show good";
       noticeEl.textContent = "Uploaded: " + fileName;
     } else {
       var err = await resp.json();
       throw new Error(err.error ? err.error.message : "Upload failed: " + resp.status);
     }
   } catch(e) {
-    noticeEl.className = "notice show bad";
-    noticeEl.textContent = "Upload failed: " + e.message + ". Try again.";
+    noticeEl.className   = "notice show bad";
+    noticeEl.textContent = "Upload failed: " + e.message + ". Please try again.";
     console.error(e);
+    throw e; // re-throw so progress isn't marked
   }
 }
 
+var folderCache = {};
 async function ensureFolder(name, parent) {
-  var key = (parent || "root") + "/" + name;
+  var key = (parent||"root") + "/" + name;
   if (folderCache[key]) return folderCache[key];
-  var parentClause = parent ? ("'" + parent + "' in parents") : ("'root' in parents");
-  var q   = "name='" + name + "' and " + parentClause + " and mimeType='application/vnd.google-apps.folder' and trashed=false";
-  var res = await fetch("https://www.googleapis.com/drive/v3/files?q=" + encodeURIComponent(q) + "&fields=files(id)", {
-    headers: { Authorization: "Bearer " + state.accessToken }
+  var parentClause = parent ? ("'"+parent+"' in parents") : ("'root' in parents");
+  var q   = "name='"+name+"' and "+parentClause+" and mimeType='application/vnd.google-apps.folder' and trashed=false";
+  var res = await fetch("https://www.googleapis.com/drive/v3/files?q="+encodeURIComponent(q)+"&fields=files(id)",{
+    headers:{Authorization:"Bearer "+state.accessToken}
   });
   var data = await res.json();
-  if (data.files && data.files.length > 0) { folderCache[key] = data.files[0].id; return folderCache[key]; }
-  var meta = { name: name, mimeType: "application/vnd.google-apps.folder" };
-  if (parent) meta.parents = [parent];
-  var cr = await fetch("https://www.googleapis.com/drive/v3/files", {
-    method: "POST",
-    headers: { Authorization: "Bearer " + state.accessToken, "Content-Type": "application/json" },
-    body: JSON.stringify(meta)
+  if (data.files && data.files.length > 0){folderCache[key]=data.files[0].id;return folderCache[key];}
+  var meta = {name:name, mimeType:"application/vnd.google-apps.folder"};
+  if (parent) meta.parents=[parent];
+  var cr = await fetch("https://www.googleapis.com/drive/v3/files",{
+    method:"POST",
+    headers:{Authorization:"Bearer "+state.accessToken,"Content-Type":"application/json"},
+    body:JSON.stringify(meta)
   });
   var created = await cr.json();
-  if (!created.id) throw new Error("Folder creation failed: " + JSON.stringify(created));
+  if (!created.id) throw new Error("Folder creation failed: "+JSON.stringify(created));
   folderCache[key] = created.id;
   return created.id;
 }
 
+// ── Reset ──────────────────────────────────────────────────────────────────
+
 function resetSession() {
-  sessionStorage.clear();
+  if (state.isRecording) stopRecording();
   folderCache = {};
   Object.assign(state, {
-    participantId:"", language:"", sentences:[], keywords:[],
-    phase:"sentences", index:0, take:1, uploaded:0,
-    audioBlob:null, audioUrl:null, accessToken:null
+    participantId:"",language:"",sentences:[],keywords:[],
+    progress:{sentences:{},keywords:{}},
+    currentPhase:"sentences",currentIndex:0,phase:"sentences",
+    accessToken:null,audioBlob:null,audioUrl:null,uploaded:0
   });
-  document.getElementById("participantId").value = "";
-  document.getElementById("language").value = "";
-  document.getElementById("scriptInfo").textContent = "Each language includes 150 sentences and 150 keywords.";
-  document.getElementById("setupNotice").className = "notice";
+  localStorage.removeItem("gcs_token");
+  document.getElementById("participantId").value="";
+  document.getElementById("language").value="";
+  document.getElementById("resumeInfo").className="notice";
+  document.getElementById("setupNotice").className="notice";
   showScreen("setup");
-  setStatus("Ready");
+  document.getElementById("statusPill").textContent="Ready";
 }
+
+// ── Events ─────────────────────────────────────────────────────────────────
 
 document.addEventListener("DOMContentLoaded", function() {
   document.getElementById("language").addEventListener("change", onLangChange);
+  document.getElementById("participantId").addEventListener("input", function(){
+    this.value = this.value.toUpperCase().replace(/[^A-Z0-9_-]/g,"");
+    checkForSavedSession();
+  });
   document.getElementById("beginBtn").addEventListener("click", beginSession);
+  document.getElementById("swSentences").addEventListener("click", function(){
+    state.phase = "sentences"; renderNavigator();
+  });
+  document.getElementById("swKeywords").addEventListener("click", function(){
+    state.phase = "keywords"; renderNavigator();
+  });
   document.getElementById("recordBtn").addEventListener("click", toggleRecord);
   document.getElementById("retakeBtn").addEventListener("click", retake);
   document.getElementById("playBtn").addEventListener("click", playback);
-  document.getElementById("prevBtn").addEventListener("click", prevItem);
-  document.getElementById("nextBtn").addEventListener("click", nextItem);
+  document.getElementById("prevBtn").addEventListener("click", goPrev);
+  document.getElementById("saveNextBtn").addEventListener("click", saveAndNext);
   document.getElementById("restartBtn").addEventListener("click", resetSession);
   document.getElementById("resetBtn").addEventListener("click", resetSession);
   boot();
