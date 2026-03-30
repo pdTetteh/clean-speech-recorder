@@ -3179,10 +3179,24 @@ document.addEventListener("DOMContentLoaded", function() {
   });
   document.getElementById("beginBtn").addEventListener("click", beginSession);
   document.getElementById("swSentences").addEventListener("click", function(){
-    state.phase = "sentences"; renderNavigator();
+    state.phase = "sentences";
+    renderNavigator();
+    // Load first unrecorded sentence, or sentence 0 if all done
+    var loaded = false;
+    for (var i = 0; i < state.sentences.length; i++) {
+      if (!state.progress.sentences[i]) { loadItem("sentences", i); loaded = true; break; }
+    }
+    if (!loaded) loadItem("sentences", 0);
   });
   document.getElementById("swKeywords").addEventListener("click", function(){
-    state.phase = "keywords"; renderNavigator();
+    state.phase = "keywords";
+    renderNavigator();
+    // Load first unrecorded keyword, or keyword 0 if all done
+    var loaded = false;
+    for (var i = 0; i < state.keywords.length; i++) {
+      if (!state.progress.keywords[i]) { loadItem("keywords", i); loaded = true; break; }
+    }
+    if (!loaded) loadItem("keywords", 0);
   });
   document.getElementById("recordBtn").addEventListener("click", toggleRecord);
   document.getElementById("retakeBtn").addEventListener("click", retake);
